@@ -55,17 +55,19 @@ WSGI_APPLICATION = 'aksvrnru.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
+default_engine = None
+import os
+with open(os.path.expanduser("~/aks_db.conf"), "r") as dbconf:
+    default_engine = eval(dbconf.read().strip())
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    'default': default_engine
 }
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'Europe/Moscow'
 
