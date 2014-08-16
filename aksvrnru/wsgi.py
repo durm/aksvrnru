@@ -1,3 +1,5 @@
+#!/home/durm/envs/aksvrn/bin/python
+
 """
 WSGI config for aksvrnru project.
 
