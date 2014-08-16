@@ -56,8 +56,13 @@ WSGI_APPLICATION = 'aksvrnru.wsgi.application'
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
 default_engine = None
+
 import os
-with open(os.path.expanduser("~/aks_db.conf"), "r") as dbconf:
+try:
+    dbconf = open(os.path.expanduser("~/aks_db.conf"), "r")
+    default_engine = eval(dbconf.read().strip())
+except:
+    dbconf = open(os.path.expanduser("/home/aksdjang/aks_db.conf"), "r")
     default_engine = eval(dbconf.read().strip())
 
 DATABASES = {
