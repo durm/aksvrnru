@@ -69,7 +69,7 @@ class Product(models.Model) :
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата изменения")
     updated_by = models.ForeignKey(User, related_name='+up+', blank=True, null=True, verbose_name="Изменил")
 
-    rubrics = models.ManyToManyField(Rubric, blank=True, verbose_name="Рубрики")
+    rubrics = models.ManyToManyField(Rubric, blank=True, null=True, verbose_name="Рубрики")
 
     def __unicode__(self):
         return "%s #%s" % (self.name, self.id)
