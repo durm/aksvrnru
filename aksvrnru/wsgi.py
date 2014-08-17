@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 import sys
 sys.path.insert(0, "/home/durm/envs/aksvrn/lib/python2.7/site-packages")
 

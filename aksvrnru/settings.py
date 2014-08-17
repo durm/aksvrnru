@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 """
 Django settings for aksvrnru project.
 
@@ -36,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'products'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -57,13 +60,17 @@ WSGI_APPLICATION = 'aksvrnru.wsgi.application'
 
 default_engine = None
 
-import os
+MEDIA_ROOT = os.path.expanduser("~/media/aksvrnru")
+MEDIA_URL = os.path.expanduser("/media/")
+
 try:
     dbconf = open(os.path.expanduser("~/aks_db.conf"), "r")
     default_engine = eval(dbconf.read().strip())
 except:
     dbconf = open(os.path.expanduser("/home/aksdjang/aks_db.conf"), "r")
     default_engine = eval(dbconf.read().strip())
+
+    MEDIA_ROOT = "/home/aksdjang/media/aksvrnru"
 
 DATABASES = {
     'default': default_engine
