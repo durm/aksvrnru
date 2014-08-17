@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 price_parsing_result = (
     ('success', 'Успешно'),
     ('error', 'Ошибка'),
+    ('process', 'В процессе'),
 )
 
 class Price(models.Model):

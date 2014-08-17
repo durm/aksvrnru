@@ -14,8 +14,11 @@ def get_path(fpath):
 
 def proc(request, obj):
 
-    #if obj.is_processed :
-    #    return
+    if obj.is_processed or obj.result == price_parsing_result[2][0] :
+        return
+
+    obj.result = price_parsing_result[2][0]
+    obj.save()
 
     try:
         stats = parse_xlsx(get_path(obj.file.name), request)

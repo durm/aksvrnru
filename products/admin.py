@@ -3,10 +3,11 @@
 from django.contrib import admin
 from products.models import *
 from products.views import proc
+import threading
 
 def proc_list(modeladmin, request, queryset):
     for obj in queryset :
-        proc(request, obj)
+        threading.Thread(target=proc, args=(request, obj)).start()
 
 proc_list.short_description = "Распарсить выделенные прайсы"
 
