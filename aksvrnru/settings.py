@@ -66,11 +66,13 @@ MEDIA_URL = os.path.expanduser("/media/")
 try:
     dbconf = open(os.path.expanduser("~/aks_db.conf"), "r")
     default_engine = eval(dbconf.read().strip())
+    STATIC_ROOT = "~/static/aksvrnru"
 except:
     dbconf = open(os.path.expanduser("/home/aksdjang/aks_db.conf"), "r")
     default_engine = eval(dbconf.read().strip())
 
     MEDIA_ROOT = "/home/aksdjang/media/aksvrnru"
+    STATIC_ROOT = "/home/aksdjang/static/aksvrnru"
 
 DATABASES = {
     'default': default_engine
