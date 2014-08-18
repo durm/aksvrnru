@@ -36,17 +36,17 @@ class Price(models.Model):
 
     def processed(self):
         return self.is_processed
-    
+
     def processing(self):
         return not self.processed() and self.result == price_parsing_result[2][0]
-    
+
     def set_processing(self):
         self.result = price_parsing_result[2][0]
-        
+
     def set_success_result(self, desc):
         self.result = price_parsing_result[0][0]
         self.result_desc = desc
-        
+
     def set_error_result(self, desc):
         self.result = price_parsing_result[1][0]
         self.result_desc = desc
@@ -103,30 +103,27 @@ class Product(models.Model) :
 
     def __unicode__(self):
         return "%s #%s" % (self.name, self.id)
-    
-    def has_image(self):
-        return self.image is not None
-    
+
     def get_full_image_path(self):
-        if self.has_image() :
+        if self.image :
             return os.path.join(settings.MEDIA_ROOT, self.image.name)
 
     def create_product_thumbnails(self):
-        if self.has_image() :
+        if self.image :
             fpath = self.get_full_image_path()
-            
+
             fpath200 = "%s200" % fpath
             get_thumbnail(fpath, (250,250), fpath200)
             add_watermark(fpath200, settings.WATER_MARK, fpath200)
-            
+
             fpath500 = "%s500" % fpath
             get_thumbnail(fpath, (500,500), fpath500)
             add_watermark(fpath500, settings.WATER_MARK, fpath500)
-            
+
             add_watermark(fpath, settings.WATER_MARK, fpath)
-        
+
     def delete_thumbnails(self):
-        if self.has_image() :
+        if self.image :
             fpath = self.get_full_image_path()
             os.remove("%s200" % fpath)
             os.remove("%s500" % fpath)
@@ -137,7 +134,7 @@ class Product(models.Model) :
 @receiver(pre_delete, sender=Product)
 def _product_delete_pre(sender, instance, **kwargs):
     instance.delete_thumbnails()
-    
+
 @receiver(post_save, sender=Product)
 def _product_create_post(sender, instance, **kwargs):
     instance.create_product_thumbnails()
