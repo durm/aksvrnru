@@ -2,7 +2,7 @@
 import uuid
 import urllib
 from lxml import html, etree
- 
+
 try:
     from PIL import Image, ImageOps
 except ImportError:
@@ -11,25 +11,26 @@ except ImportError:
 
 def get_html_desc(url):
     try:
-        page = html.parse(url).getroot()
-        return etree.tostring(page.find_class('fulltext')[0])
+        parser = etree.HTMLParser(encoding='cp1251')
+        page = html.parse(url, parser).getroot()
+        return etree.tostring(page.xpath('//div[@class="fulltext"]')[0], encoding="utf-8")
     except:
         return ""
-    
+
 def get_id():
     return str(uuid.uuid4())
 
 def retrieve(url, fname):
     urllib.urlretrieve(url, fname)
-    
+
 def get_thumbnail(ipath, size, output, output_format='PNG'):
     image = Image.open(ipath)
     if image.mode not in ("L", "RGB"):
         image = image.convert("RGB")
-        
+
     image.thumbnail(size, Image.ANTIALIAS)
     image.save(output, output_format)
-    
+
 def add_watermark(orig, mark, dest):
     baseim = Image.open(orig)
     logoim = Image.open(mark)
