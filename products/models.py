@@ -32,7 +32,7 @@ class Price(models.Model):
     processed_by = models.ForeignKey(User, related_name='+pr+', blank=True, null=True, verbose_name="Инициатор обработки")
 
     result = models.CharField(max_length=7, choices=price_parsing_result, blank=True, verbose_name="Результат")
-    result_desc = models.TextField(blank=True, verbose_name="Сводка")
+    result_desc = models.TextField(blank=True, null=True, verbose_name="Сводка")
 
     def processed(self):
         return self.is_processed

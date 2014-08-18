@@ -9,6 +9,7 @@ import traceback
 from lxml import html, etree
 import uuid
 import urllib
+import xlrd
 
 def get_path(fpath):
     return os.path.join(settings.MEDIA_ROOT, fpath)
@@ -57,14 +58,21 @@ def proc(request, obj):
         return
 
     obj.set_processing()
+    
+    obj.result_desc = ""
+    
     obj.save()
 
     try:
-        stats = parse_xlsx(get_path(obj.file.name), request)
+        stats = parse_xlsx_xlrd(get_path(obj.file.name), request)
 
         obj.set_success_result(get_success_desc(stats))
     except Exception as e:
-        obj.set_error_result(traceback.print_exc())
+        
+        tb = traceback.print_exc()
+        tb = " (" + tb + ")" if tb is not None else ""
+        
+        obj.set_error_result(str(e) + tb)
 
     obj.set_processed(request.user)
 
@@ -105,6 +113,62 @@ def parse_xlsx(f, request):
                 product.trade_price = get_float(trade_price)
 
             product.retail_price=get_float(retail_price)
+
+            product.created_by=request.user
+            product.updated_by=request.user
+
+            product.rubrics.add(current_rubric)
+
+            product.save()
+
+            stats["products"] += 1
+
+    return stats
+
+def parse_xlsx_xlrd(f, request):
+
+    wb = xlrd.open_workbook(f, formatting_info=True)
+    ws = wb.sheet_by_index(0)
+
+    current_rubric = None
+
+    stats = {'rubrics':0, 'products':0}
+
+    for row in range(ws.nrows)[4:]:
+
+        rowValues = ws.row_values(row, start_colx=0, end_colx=5)
+
+        name = rowValues[0]
+
+        if not name : break
+
+        trade_price = rowValues[1]
+        retail_price = rowValues[2]
+        
+        link = ws.hyperlink_map.get((row, 5))
+        
+        if link is not None :
+            external_link = link.url_or_path
+
+        if is_rubric(trade_price, retail_price, external_link) :
+
+            current_rubric, created = Rubric.objects.get_or_create(name=name)
+            stats["rubrics"] += 1
+
+        else:
+
+            product, created = Product.objects.get_or_create(name=name)
+
+            if is_by_order(trade_price) :
+                product.by_order = True
+                product.trade_price=0
+            else:
+                product.trade_price = get_float(trade_price)
+
+            product.retail_price=get_float(retail_price)
+            
+            if link is not None :
+                product.external_link = link.url_or_path
 
             product.created_by=request.user
             product.updated_by=request.user

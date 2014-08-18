@@ -7,7 +7,8 @@ import threading
 
 def proc_list(modeladmin, request, queryset):
     for obj in queryset :
-        threading.Thread(target=proc, args=(request, obj)).start()
+        #threading.Thread(target=proc, args=(request, obj)).start()
+        proc(request, obj)
 
 proc_list.short_description = "Распарсить выделенные прайсы"
 
