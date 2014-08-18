@@ -59,7 +59,7 @@ WSGI_APPLICATION = 'aksvrnru.wsgi.application'
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
 
-MEDIA_URL = os.path.expanduser("/media/")
+MEDIA_URL = "/media/"
 
 if os.path.exists(os.path.expanduser("~/aks_db.conf")):
     MEDIA_ROOT = os.path.expanduser("~/media/aksvrnru")

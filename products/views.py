@@ -102,6 +102,8 @@ def parse_xlsx_xlrd(f, request):
 
         if link is not None :
             external_link = link.url_or_path
+        else:
+            external_link=""
 
         if is_rubric(trade_price, retail_price, external_link) :
 
@@ -122,6 +124,8 @@ def parse_xlsx_xlrd(f, request):
 
             if link is not None :
                 product.external_link = link.url_or_path
+
+                product.desc = get_html_desc(product.external_link)
 
             product.created_by=request.user
             product.updated_by=request.user
