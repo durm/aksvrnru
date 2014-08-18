@@ -63,18 +63,18 @@ def proc(request, obj):
 
     obj.save()
 
-    try:
-        stats = parse_xlsx_xlrd(get_path(obj.file.name), request)
+    #try:
+    stats = parse_xlsx_xlrd(get_path(obj.file.name), request)
 
-        obj.set_success_result(get_success_desc(stats))
-    except Exception as e:
+    obj.set_success_result(get_success_desc(stats))
+    #except Exception as e:
 
-        raise e
+    #    raise e
 
-        tb = traceback.print_exc()
-        tb = " (" + tb + ")" if tb is not None else ""
+    #    tb = traceback.print_exc()
+    #    tb = " (" + tb + ")" if tb is not None else ""
 
-        obj.set_error_result(str(e) + tb)
+    #    obj.set_error_result(str(e) + tb)
 
     obj.set_processed(request.user)
 
