@@ -58,10 +58,17 @@ WSGI_APPLICATION = 'aksvrnru.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
-MEDIA_ROOT = os.path.expanduser("~/media/aksvrnru")
+
 MEDIA_URL = os.path.expanduser("/media/")
 
-dbconf = open(os.path.expanduser("~/aks_db.conf"), "r")
+if os.path.exists(os.path.expanduser("~/aks_db.conf")):
+    MEDIA_ROOT = os.path.expanduser("~/media/aksvrnru")
+    dbconf = open(os.path.expanduser("~/aks_db.conf"), "r")
+else:
+    MEDIA_ROOT = os.path.expanduser("/home/aksdjang/media/aksvrnru")
+    dbconf = open(os.path.expanduser("/home/aksdjang/aks_db.conf"), "r")
+
+
 default_engine = eval(dbconf.read().strip())
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 WATER_MARK = os.path.join(STATIC_ROOT, "watermark.png")

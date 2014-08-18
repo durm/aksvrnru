@@ -51,16 +51,16 @@ def get_float(v):
         return float(v)
     except:
         return 0
-    
+
 def proc(request, obj):
 
     if obj.processed() or obj.processing() :
         return
 
     obj.set_processing()
-    
+
     obj.result_desc = ""
-    
+
     obj.save()
 
     try:
@@ -68,62 +68,15 @@ def proc(request, obj):
 
         obj.set_success_result(get_success_desc(stats))
     except Exception as e:
-        
+
         tb = traceback.print_exc()
         tb = " (" + tb + ")" if tb is not None else ""
-        
+
         obj.set_error_result(str(e) + tb)
 
     obj.set_processed(request.user)
 
     obj.save()
-
-def parse_xlsx(f, request):
-
-    wb = load_workbook(filename = f)
-    ws = wb.active
-
-    current_rubric = None
-
-    stats = {'rubrics':0, 'products':0}
-
-    for row in ws.rows[4:]:
-
-        name = get_name(row)
-
-        if not name : break
-
-        trade_price = get_trade_price(row)
-        retail_price = get_retail_price(row)
-        external_link = get_external_link(row)
-
-        if is_rubric(trade_price, retail_price, external_link) :
-
-            current_rubric, created = Rubric.objects.get_or_create(name=name)
-            stats["rubrics"] += 1
-
-        else:
-
-            product, created = Product.objects.get_or_create(name=name)
-
-            if is_by_order(trade_price) :
-                product.by_order = True
-                product.trade_price=0
-            else:
-                product.trade_price = get_float(trade_price)
-
-            product.retail_price=get_float(retail_price)
-
-            product.created_by=request.user
-            product.updated_by=request.user
-
-            product.rubrics.add(current_rubric)
-
-            product.save()
-
-            stats["products"] += 1
-
-    return stats
 
 def parse_xlsx_xlrd(f, request):
 
@@ -144,9 +97,9 @@ def parse_xlsx_xlrd(f, request):
 
         trade_price = rowValues[1]
         retail_price = rowValues[2]
-        
+
         link = ws.hyperlink_map.get((row, 5))
-        
+
         if link is not None :
             external_link = link.url_or_path
 
@@ -166,7 +119,7 @@ def parse_xlsx_xlrd(f, request):
                 product.trade_price = get_float(trade_price)
 
             product.retail_price=get_float(retail_price)
-            
+
             if link is not None :
                 product.external_link = link.url_or_path
 
@@ -183,7 +136,3 @@ def parse_xlsx_xlrd(f, request):
 
 def get_success_desc(stats):
     return "Прайс успешно обработан. (рубрики: %s, продукты: %s)" % (stats.get("rubrics",0), stats.get("products", 0))
-
-    
-    
-    
