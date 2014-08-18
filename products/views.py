@@ -69,6 +69,8 @@ def proc(request, obj):
         obj.set_success_result(get_success_desc(stats))
     except Exception as e:
 
+        raise e
+
         tb = traceback.print_exc()
         tb = " (" + tb + ")" if tb is not None else ""
 
