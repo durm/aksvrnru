@@ -53,7 +53,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('by_order', 'is_new', 'is_special_price')
     search_fields = ['name']
 
-    fields = ['name', 'desc', 'rubrics', 'trade_price', 'retail_price', 'recommend_price',
+    fields = ['name', 'desc', 'image', 'rubrics', 'trade_price', 'retail_price', 'recommend_price',
         'amount', 'external_link', 'by_order', 'is_new', 'is_special_price',
         'created_at', 'created_by' , 'updated_at' , 'updated_by']
 

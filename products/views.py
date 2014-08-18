@@ -5,35 +5,13 @@ from products.models import *
 from aksvrnru import settings
 import os
 from openpyxl import load_workbook
-
-
-SUCCESS_DESC = "Прайс успешно обработан"
+import traceback
+from lxml import html, etree
+import uuid
+import urllib
 
 def get_path(fpath):
     return os.path.join(settings.MEDIA_ROOT, fpath)
-
-def proc(request, obj):
-
-    if obj.is_processed or obj.result == price_parsing_result[2][0] :
-        return
-
-    obj.result = price_parsing_result[2][0]
-    obj.save()
-
-    try:
-        stats = parse_xlsx(get_path(obj.file.name), request)
-
-        obj.result = price_parsing_result[0][0]
-        obj.result_desc = SUCCESS_DESC + " (рубрики: %s, продукты: %s)" % (stats.get("rubrics",0), stats.get("products", 0))
-    except Exception as e:
-        obj.result = price_parsing_result[1][0]
-        obj.result_desc = str(e)
-        print "Exceptiion:", str(e)
-
-    obj.processed_by = request.user
-    obj.is_processed = True
-
-    obj.save()
 
 def get_prop(r, i):
     return r[i].value
@@ -72,6 +50,25 @@ def get_float(v):
         return float(v)
     except:
         return 0
+    
+def proc(request, obj):
+
+    if obj.processed() or obj.processing() :
+        return
+
+    obj.set_processing()
+    obj.save()
+
+    try:
+        stats = parse_xlsx(get_path(obj.file.name), request)
+
+        obj.set_success_result(get_success_desc(stats))
+    except Exception as e:
+        obj.set_error_result(traceback.print_exc())
+
+    obj.set_processed(request.user)
+
+    obj.save()
 
 def parse_xlsx(f, request):
 
@@ -119,3 +116,10 @@ def parse_xlsx(f, request):
             stats["products"] += 1
 
     return stats
+
+def get_success_desc(stats):
+    return "Прайс успешно обработан. (рубрики: %s, продукты: %s)" % (stats.get("rubrics",0), stats.get("products", 0))
+
+    
+    
+    

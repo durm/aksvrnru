@@ -58,21 +58,13 @@ WSGI_APPLICATION = 'aksvrnru.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
-default_engine = None
-
 MEDIA_ROOT = os.path.expanduser("~/media/aksvrnru")
 MEDIA_URL = os.path.expanduser("/media/")
 
-try:
-    dbconf = open(os.path.expanduser("~/aks_db.conf"), "r")
-    default_engine = eval(dbconf.read().strip())
-    STATIC_ROOT = os.path.expanduser("~/static/aksvrnru")
-except:
-    dbconf = open(os.path.expanduser("/home/aksdjang/aks_db.conf"), "r")
-    default_engine = eval(dbconf.read().strip())
-
-    MEDIA_ROOT = "/home/aksdjang/media/aksvrnru"
-    STATIC_ROOT = "/home/aksdjang/static/aksvrnru"
+dbconf = open(os.path.expanduser("~/aks_db.conf"), "r")
+default_engine = eval(dbconf.read().strip())
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+WATER_MARK = os.path.join(STATIC_ROOT, "watermark.png")
 
 DATABASES = {
     'default': default_engine
@@ -90,7 +82,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
