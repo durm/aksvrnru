@@ -14,8 +14,11 @@ import xlrd
 def get_path(fpath):
     return os.path.join(settings.MEDIA_ROOT, fpath)
 
+def get_row_values(ws, row):
+    return ws.row_values(row, start_colx=0, end_colx=5)
+
 def get_prop(r, i):
-    return r[i].value
+    return r[i]
 
 def get_name(r):
     return get_prop(r, 0)
@@ -34,8 +37,13 @@ def get_amount(r):
     #return get_prop(r, 4)
     return 0
 
-def get_external_link(r):
-    return get_prop(r, 5)
+def get_external_link(ws, row):
+    link = ws.hyperlink_map.get((row, 5))
+
+    if link is not None :
+        return link.url_or_path
+    else:
+        return ""
 
 def is_empty(x):
     return x == ""
@@ -51,34 +59,32 @@ def get_float(v):
         return float(v)
     except:
         return 0
+    
+def make_stats():
+    return {"products": 0, "rubrics": 0}
+
+def inc_products(stats):
+    stats["products"] += 1
+
+def inc_products(stats):
+    stats["rubrics"] += 1
 
 def proc(request, obj):
 
-    if obj.processed() or obj.processing() :
-        return
+    #if obj.processed() or obj.processing() : return
 
     obj.set_processing()
 
-    obj.result_desc = ""
+    try:
+        stats = parse_xlsx_xlrd(get_path(obj.file.name), request)
 
-    obj.save()
+        obj.set_success_result(request.user, get_success_desc(stats))
+    except Exception as e:
 
-    #try:
-    stats = parse_xlsx_xlrd(get_path(obj.file.name), request)
+        tb = traceback.print_exc()
+        tb = " (" + tb + ")" if tb is not None else ""
+        obj.set_error_result(request.user, str(e) + tb)
 
-    obj.set_success_result(get_success_desc(stats))
-    #except Exception as e:
-
-    #    raise e
-
-    #    tb = traceback.print_exc()
-    #    tb = " (" + tb + ")" if tb is not None else ""
-
-    #    obj.set_error_result(str(e) + tb)
-
-    obj.set_processed(request.user)
-
-    obj.save()
 
 def parse_xlsx_xlrd(f, request):
 
@@ -87,30 +93,25 @@ def parse_xlsx_xlrd(f, request):
 
     current_rubric = None
 
-    stats = {'rubrics':0, 'products':0}
+    stats = make_stats()
 
-    for row in range(ws.nrows)[4:]:
+    for row in range(ws.nrows)[4:20]:
 
-        rowValues = ws.row_values(row, start_colx=0, end_colx=5)
+        rowValues = get_row_values(ws, row)
 
-        name = rowValues[0]
+        name = get_name(rowValues)
 
         if not name : break
 
-        trade_price = rowValues[1]
-        retail_price = rowValues[2]
-
-        link = ws.hyperlink_map.get((row, 5))
-
-        if link is not None :
-            external_link = link.url_or_path
-        else:
-            external_link=""
+        trade_price = get_trade_price(rowValues)
+        retail_price = get_retail_price(rowValues)
+        external_link = get_external_link(ws, row)
 
         if is_rubric(trade_price, retail_price, external_link) :
 
             current_rubric, created = Rubric.objects.get_or_create(name=name)
-            stats["rubrics"] += 1
+            
+            inc_products(stats)
 
         else:
 
@@ -124,19 +125,17 @@ def parse_xlsx_xlrd(f, request):
 
             product.retail_price=get_float(retail_price)
 
-            if link is not None :
-                product.external_link = link.url_or_path
-
-                product.desc = get_html_desc(product.external_link)
+            product.external_link = external_link
 
             product.created_by=request.user
             product.updated_by=request.user
 
             product.rubrics.add(current_rubric)
 
+            product.get_external_desc()
             product.save()
 
-            stats["products"] += 1
+            inc_products(stats)
 
     return stats
 

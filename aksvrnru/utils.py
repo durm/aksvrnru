@@ -2,6 +2,7 @@
 import uuid
 import urllib
 from lxml import html, etree
+import html2text
 
 try:
     from PIL import Image, ImageOps
@@ -9,11 +10,18 @@ except ImportError:
     import Image
     import ImageOps
 
-def get_html_desc(url):
+def html_to_text(html_desc):
+    h = html2text.HTML2Text()
+    h.ignore_links = True
+    return h.handle(html_desc)
+
+def get_external_desc(url):
     try:
         parser = etree.HTMLParser(encoding='cp1251')
         page = html.parse(url, parser).getroot()
-        return etree.tostring(page.xpath('//div[@class="fulltext"]')[0], encoding="utf-8")
+        hd = etree.tostring(page.xpath('//div[@class="fulltext"]')[0], encoding="utf-8")
+        md = html_to_text(hd.decode("utf-8"))
+        return md
     except:
         return ""
 

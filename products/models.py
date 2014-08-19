@@ -42,18 +42,23 @@ class Price(models.Model):
 
     def set_processing(self):
         self.result = price_parsing_result[2][0]
+        self.result_desc = ""
+        self.save()
 
-    def set_success_result(self, desc):
+    def set_success_result(self, user, desc):
         self.result = price_parsing_result[0][0]
         self.result_desc = desc
+        self.set_processed(user)
 
-    def set_error_result(self, desc):
+    def set_error_result(self, user, desc):
         self.result = price_parsing_result[1][0]
         self.result_desc = desc
+        self.set_processed(user)
 
     def set_processed(self, user):
         self.is_processed = True
         self.processed_by = user
+        self.save()
 
     def __unicode__(self):
         name = self.name if self.name else self.file.name
@@ -84,7 +89,7 @@ class Product(models.Model) :
     retail_price = models.FloatField(default=0, verbose_name="Розничная цена")
     recommend_price = models.FloatField(default=0, verbose_name="Рекомендованная цена")
 
-    amount = models.IntegerField(default=0)
+    amount = models.IntegerField(default=0, verbose_name="Количество")
 
     external_link = models.URLField(blank=True, verbose_name="Внешняя ссылка")
 
@@ -127,6 +132,13 @@ class Product(models.Model) :
             fpath = self.get_full_image_path()
             os.remove("%s200" % fpath)
             os.remove("%s500" % fpath)
+            
+    def get_external_desc(self):
+        if self.external_link :
+            print 1
+            self.desc = get_external_desc(self.external_link)
+        else:
+            print 2
 
     class Meta :
         verbose_name = "Продукт"
