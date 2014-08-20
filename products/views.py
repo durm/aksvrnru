@@ -4,7 +4,6 @@ from django.shortcuts import render
 from products.models import *
 from aksvrnru import settings
 import os
-from openpyxl import load_workbook
 import traceback
 from lxml import html, etree
 import uuid
@@ -15,7 +14,7 @@ def get_path(fpath):
     return os.path.join(settings.MEDIA_ROOT, fpath)
 
 def get_row_values(ws, row):
-    return ws.row_values(row, start_colx=0, end_colx=5)
+    return ws.row_values(row, start_colx=0, end_colx=6)
 
 def get_prop(r, i):
     return r[i]
@@ -33,11 +32,9 @@ def get_retail_price(r):
     return get_prop(r, 2)
 
 def get_by_order(r):
-    #return get_prop(r, 3)
     return False
 
 def get_amount(r):
-    #return get_prop(r, 4)
     return 0
 
 def get_external_link(ws, row):
@@ -52,12 +49,10 @@ def is_empty(x):
     return x == ""
 
 def is_rubric(r):
-    return 
-        not(is_empty(get_prop(r, 0))) and is_empty(get_prop(r, 1)) and is_empty(get_prop(r, 2)) and is_empty(get_prop(r, 5))
+    return not(is_empty(get_prop(r, 0))) and is_empty(get_prop(r, 1)) and is_empty(get_prop(r, 2)) and is_empty(get_prop(r, 5))
 
 def is_product(r):
-    return 
-        not(is_empty(get_prop(r, 0))) and not(is_empty(get_prop(r, 1))) and not(is_empty(get_prop(r, 2))) and not(is_empty(get_prop(r, 5)))
+    return not(is_empty(get_prop(r, 0))) and not(is_empty(get_prop(r, 1))) and not(is_empty(get_prop(r, 2))) and not(is_empty(get_prop(r, 5)))
 
 def is_by_order(v):
     return v == u"Под заказ"
@@ -73,7 +68,7 @@ def get_float(v):
         return float(v)
     except:
         return 0
-    
+
 def make_stats():
     return {"products": 0, "rubrics": 0}
 
@@ -82,6 +77,55 @@ def inc_products(stats):
 
 def inc_rubrics(stats):
     stats["rubrics"] += 1
+
+def parse_name(fullname, user):
+    parts = fullname.split("|")
+    parts = [i.strip() for i in parts]
+
+    name = parts[1] if len(parts) >= 2 else ""
+    vendor, created = Vendor.objects.get_or_create(name=parts[0], updated_by=user) if len(parts) >= 1 else ("", False)
+    if created :
+        vendor.created_by = user
+        vendor.save()
+    short_desc = parts[2] if len(parts) >= 3 else ""
+
+    return (name, vendor, short_desc)
+
+def store_rubric(r, user):
+    name = get_name(r)
+    rubric, created = Rubric.objects.get_or_create(name=name, updated_by=user)
+    if created :
+        rubric.created_by = user
+        rubric.save()
+    return (rubric, created)
+
+def store_product(rowValues, ws, row, user, current_rubric):
+
+    name = get_name(rowValues)
+    trade_price = get_trade_price(rowValues)
+    retail_price = get_retail_price(rowValues)
+    external_link = get_external_link(ws, row)
+
+    name, vendor, short_desc = parse_name(name, user)
+
+    trade_price, is_by_order = get_trade_price_and_is_by_order(trade_price)
+    retail_price = get_float(retail_price)
+
+    product, created = Product.objects.get_or_create(name=name)
+
+    desc = get_external_desc(external_link) if external_link and created else ""
+
+    created_by = user if created else None
+
+    product.store(vendor=vendor,
+                    short_desc=short_desc,
+                    desc=desc,
+                    trade_price=trade_price,
+                    retail_price=retail_price,
+                    external_link=external_link,
+                    created_by=created_by,
+                    updated_by=user,
+                    current_rubric=current_rubric)
 
 def proc(request, obj):
 
@@ -99,32 +143,6 @@ def proc(request, obj):
         tb = " (" + tb + ")" if tb is not None else ""
         obj.set_error_result(request.user, str(e) + tb)
 
-def store_rubric(r):
-    name = get_name(r)
-    return Rubric.objects.get_or_create(name=name)
-    
-def store_product(r):
-    name = get_name(rowValues)
-    trade_price = get_trade_price(rowValues)
-    retail_price = get_retail_price(rowValues)
-    external_link = get_external_link(ws, row)
-    
-    name, vendor, short_desc = parse_name(name)
-            
-    trade_price, is_by_order = get_trade_price_and_is_by_order(trade_price)
-    retail_price = get_float(retail_price)
-
-    product, created = Product.objects.get_or_create(name=name)
-
-    product.store(vendor=vendor, 
-                    short_desc=short_desc, 
-                    trade_price=trade_price, 
-                    retail_price=retail_price, 
-                    external_link=external_link, 
-                    created_by=request.user,
-                    updated_by=request.user, 
-                    current_rubric=current_rubric)
-
 def parse_xlsx_xlrd(f, request):
 
     wb = xlrd.open_workbook(f, formatting_info=True)
@@ -135,19 +153,16 @@ def parse_xlsx_xlrd(f, request):
     stats = make_stats()
 
     for row in range(ws.nrows)[4:20]:
-
         rowValues = get_row_values(ws, row)
 
-        if is_empty_row(rowValues) : 
+        if is_empty_row(rowValues) :
             break
-        elif is_rubric(rowValues) :
-            current_rubric, created = store_rubric(rowValues)
+        if is_rubric(rowValues) :
+            current_rubric, created = store_rubric(rowValues, request.user)
             inc_rubrics(stats)
-        elif is_product(rowValues):
-            store_product(rowValues)
+        if is_product(rowValues):
+            store_product(rowValues, ws, row, request.user, current_rubric)
             inc_products(stats)
-        else:
-            continue
 
     return stats
 

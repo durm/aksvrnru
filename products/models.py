@@ -62,7 +62,7 @@ class Price(models.Model):
 
     def __unicode__(self):
         name = self.name if self.name else self.file.name
-        return "%s #%s" % (name, self.id)
+        return "%s" % (name)
 
     class Meta :
         verbose_name = "Прайс"
@@ -72,15 +72,30 @@ class Rubric(models.Model):
     desc = models.TextField(blank=True, verbose_name="Описание")
     parent = models.ForeignKey('self', null=True, blank=True, verbose_name="Родительская рубрика")
 
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    created_by = models.ForeignKey(User, related_name='+cr+', blank=True, null=True, verbose_name="Создал")
+
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата изменения")
+    updated_by = models.ForeignKey(User, related_name='+up+', blank=True, null=True, verbose_name="Изменил")
+
     def __unicode__(self):
-        return "%s #%s" % (self.name, self.id)
+        return "%s" % (self.name)
 
     class Meta :
         verbose_name = "Рубрика"
-        
+
 class Vendor(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название", unique=True)
-    
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    created_by = models.ForeignKey(User, related_name='+cr+', blank=True, null=True, verbose_name="Создал")
+
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата изменения")
+    updated_by = models.ForeignKey(User, related_name='+up+', blank=True, null=True, verbose_name="Изменил")
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+
     class Meta :
         verbose_name = "Производитель"
 
@@ -88,7 +103,7 @@ class Product(models.Model) :
 
     name = models.CharField(max_length=255, verbose_name="Название", unique=True)
     vendor = models.ForeignKey(Vendor, verbose_name="Производитель", null=True, blank=True)
-    
+
     short_desc = models.TextField(blank=True, null=True, verbose_name="Краткое описание")
     desc = models.TextField(blank=True, null=True, verbose_name="Полное описание")
 
@@ -115,9 +130,6 @@ class Product(models.Model) :
 
     rubrics = models.ManyToManyField(Rubric, blank=True, null=True, verbose_name="Рубрики")
 
-    def __unicode__(self):
-        return "%s #%s" % (self.name, self.id)
-
     def get_full_image_path(self):
         if self.image :
             return os.path.join(settings.MEDIA_ROOT, self.image.name)
@@ -141,34 +153,32 @@ class Product(models.Model) :
             fpath = self.get_full_image_path()
             os.remove("%s200" % fpath)
             os.remove("%s500" % fpath)
-            
-    def get_external_desc(self):
-        if self.external_link :
-            self.desc = get_external_desc(self.external_link)
-        
-    def store(self, vendor=None, short_desc=None, trade_price=0, is_by_order=False, external_link="", current_rubric=None, created_by=None, updated_by=None) :
-        
+
+    def store(self, vendor=None, desc = "", short_desc="", trade_price=0, retail_price=0, is_by_order=False, external_link="", current_rubric=None, created_by=None, updated_by=None) :
+        print "----", vendor
         self.vendor = vendor
-        
+
         self.short_desc = short_desc
-        
+        self.desc = desc
+
         self.trade_price = trade_price
-        
+
         self.by_order = is_by_order
-        
+
         self.retail_price=retail_price
-        
+
         self.external_link = external_link
-        
+
         if created_by :
             self.created_by = created_by
         self.updated_by = updated_by
 
         self.rubrics.add(current_rubric)
 
-        self.get_external_desc()
-        
         self.save()
+
+    def __unicode__(self):
+        return "%s" % (self.name)
 
     class Meta :
         verbose_name = "Продукт"

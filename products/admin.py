@@ -41,8 +41,9 @@ class PriceAdmin(admin.ModelAdmin):
         if not hasattr(obj, 'created_by') or (hasattr(obj, 'created_by') and obj.created_by is None) :
 
             obj.created_by = request.user
-            obj.processed_by = request.user
-            obj.updated_by = request.user
+
+        obj.processed_by = request.user
+        obj.updated_by = request.user
 
         obj.save()
 
@@ -50,11 +51,11 @@ class PriceAdmin(admin.ModelAdmin):
 
 class ProductAdmin(admin.ModelAdmin):
 
-    list_display = ('name',)
+    list_display = ('name', 'vendor', 'short_desc')
     list_filter = ('by_order', 'is_new', 'is_special_price')
     search_fields = ['name']
 
-    fields = ['name', 'desc', 'image', 'rubrics', 'trade_price', 'retail_price', 'recommend_price',
+    fields = ['name', 'vendor', 'short_desc', 'desc', 'image', 'rubrics', 'trade_price', 'retail_price', 'recommend_price',
         'amount', 'external_link', 'by_order', 'is_new', 'is_special_price',
         'created_at', 'created_by' , 'updated_at' , 'updated_by']
 
@@ -65,12 +66,37 @@ class ProductAdmin(admin.ModelAdmin):
         if not hasattr(obj, 'created_by') or (hasattr(obj, 'created_by') and obj.created_by is None) :
 
             obj.created_by = request.user
-            obj.updated_by = request.user
 
+        obj.updated_by = request.user
         obj.save()
 
-    actions = [proc_list]
+class RubricAdmin(admin.ModelAdmin):
+
+    readonly_fields = ['created_by', 'created_at', 'updated_by', 'updated_at']
+
+    def save_model(self, request, obj, form, change):
+
+        if not hasattr(obj, 'created_by') or (hasattr(obj, 'created_by') and obj.created_by is None) :
+
+            obj.created_by = request.user
+
+        obj.updated_by = request.user
+        obj.save()
+
+class VendorAdmin(admin.ModelAdmin):
+
+    readonly_fields = ['created_by', 'created_at', 'updated_by', 'updated_at']
+
+    def save_model(self, request, obj, form, change):
+
+        if not hasattr(obj, 'created_by') or (hasattr(obj, 'created_by') and obj.created_by is None) :
+
+            obj.created_by = request.user
+
+        obj.updated_by = request.user
+        obj.save()
 
 admin.site.register(Price, PriceAdmin)
 admin.site.register(Product, ProductAdmin)
-admin.site.register(Rubric)
+admin.site.register(Rubric, RubricAdmin)
+admin.site.register(Vendor, VendorAdmin)
