@@ -31,7 +31,7 @@ class Price(models.Model):
     processed_at = models.DateTimeField(auto_now=True, verbose_name="Дата обработки")
     processed_by = models.ForeignKey(User, related_name='+pr+', blank=True, null=True, verbose_name="Инициатор обработки")
 
-    result = models.CharField(max_length=7, choices=price_parsing_result, blank=True, verbose_name="Результат")
+    result = models.CharField(max_length=7, choices=price_parsing_result, blank=True, null=True, verbose_name="Результат")
     result_desc = models.TextField(blank=True, null=True, verbose_name="Сводка")
 
     def processed(self):
@@ -77,11 +77,20 @@ class Rubric(models.Model):
 
     class Meta :
         verbose_name = "Рубрика"
+        
+class Vendor(models.Model):
+    name = models.CharField(max_length=255, verbose_name="Название", unique=True)
+    
+    class Meta :
+        verbose_name = "Производитель"
 
 class Product(models.Model) :
 
     name = models.CharField(max_length=255, verbose_name="Название", unique=True)
-    desc = models.TextField(blank=True, verbose_name="Описание")
+    vendor = models.ForeignKey(Vendor, verbose_name="Производитель", null=True, blank=True)
+    
+    short_desc = models.TextField(blank=True, null=True, verbose_name="Краткое описание")
+    desc = models.TextField(blank=True, null=True, verbose_name="Полное описание")
 
     image = models.ImageField(upload_to='products', verbose_name="Изображение", null=True, blank=True)
 
@@ -91,7 +100,7 @@ class Product(models.Model) :
 
     amount = models.IntegerField(default=0, verbose_name="Количество")
 
-    external_link = models.URLField(blank=True, verbose_name="Внешняя ссылка")
+    external_link = models.URLField(blank=True, null=True, verbose_name="Внешняя ссылка")
 
     by_order = models.BooleanField(default=False, verbose_name="Под заказ")
 
@@ -135,10 +144,31 @@ class Product(models.Model) :
             
     def get_external_desc(self):
         if self.external_link :
-            print 1
             self.desc = get_external_desc(self.external_link)
-        else:
-            print 2
+        
+    def store(self, vendor=None, short_desc=None, trade_price=0, is_by_order=False, external_link="", current_rubric=None, created_by=None, updated_by=None) :
+        
+        self.vendor = vendor
+        
+        self.short_desc = short_desc
+        
+        self.trade_price = trade_price
+        
+        self.by_order = is_by_order
+        
+        self.retail_price=retail_price
+        
+        self.external_link = external_link
+        
+        if created_by :
+            self.created_by = created_by
+        self.updated_by = updated_by
+
+        self.rubrics.add(current_rubric)
+
+        self.get_external_desc()
+        
+        self.save()
 
     class Meta :
         verbose_name = "Продукт"

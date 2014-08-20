@@ -44,3 +44,8 @@ def add_watermark(orig, mark, dest):
     logoim = Image.open(mark)
     baseim.paste(logoim, (baseim.size[0]-logoim.size[0], baseim.size[1]-logoim.size[1]), logoim)
     baseim.save(dest,"PNG")
+
+def parse_name(full_name):
+    parts = fullname.split("|")
+    parts = [i.strip() for i in parts]
+    return (parts[0] if len(parts) >= 1 else "", Vendor.objects.get_or_create(name=parts[1]) if len(parts) >= 2 else "", parts[2] if len(parts) >= 3 else "")

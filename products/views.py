@@ -20,6 +20,9 @@ def get_row_values(ws, row):
 def get_prop(r, i):
     return r[i]
 
+def is_empty_row(r):
+    return is_empty(get_prop(r, 0))
+
 def get_name(r):
     return get_prop(r, 0)
 
@@ -48,11 +51,22 @@ def get_external_link(ws, row):
 def is_empty(x):
     return x == ""
 
-def is_rubric(tp, rp, e):
-    return is_empty(tp) and is_empty(rp) and is_empty(e)
+def is_rubric(r):
+    return 
+        not(is_empty(get_prop(r, 0))) and is_empty(get_prop(r, 1)) and is_empty(get_prop(r, 2)) and is_empty(get_prop(r, 5))
+
+def is_product(r):
+    return 
+        not(is_empty(get_prop(r, 0))) and not(is_empty(get_prop(r, 1))) and not(is_empty(get_prop(r, 2))) and not(is_empty(get_prop(r, 5)))
 
 def is_by_order(v):
     return v == u"Под заказ"
+
+def get_trade_price_and_is_by_order(trade_price):
+    if is_by_order(trade_price) :
+        return (0, True)
+    else:
+        return (get_float(trade_price), False)
 
 def get_float(v):
     try:
@@ -66,7 +80,7 @@ def make_stats():
 def inc_products(stats):
     stats["products"] += 1
 
-def inc_products(stats):
+def inc_rubrics(stats):
     stats["rubrics"] += 1
 
 def proc(request, obj):
@@ -85,6 +99,31 @@ def proc(request, obj):
         tb = " (" + tb + ")" if tb is not None else ""
         obj.set_error_result(request.user, str(e) + tb)
 
+def store_rubric(r):
+    name = get_name(r)
+    return Rubric.objects.get_or_create(name=name)
+    
+def store_product(r):
+    name = get_name(rowValues)
+    trade_price = get_trade_price(rowValues)
+    retail_price = get_retail_price(rowValues)
+    external_link = get_external_link(ws, row)
+    
+    name, vendor, short_desc = parse_name(name)
+            
+    trade_price, is_by_order = get_trade_price_and_is_by_order(trade_price)
+    retail_price = get_float(retail_price)
+
+    product, created = Product.objects.get_or_create(name=name)
+
+    product.store(vendor=vendor, 
+                    short_desc=short_desc, 
+                    trade_price=trade_price, 
+                    retail_price=retail_price, 
+                    external_link=external_link, 
+                    created_by=request.user,
+                    updated_by=request.user, 
+                    current_rubric=current_rubric)
 
 def parse_xlsx_xlrd(f, request):
 
@@ -99,43 +138,16 @@ def parse_xlsx_xlrd(f, request):
 
         rowValues = get_row_values(ws, row)
 
-        name = get_name(rowValues)
-
-        if not name : break
-
-        trade_price = get_trade_price(rowValues)
-        retail_price = get_retail_price(rowValues)
-        external_link = get_external_link(ws, row)
-
-        if is_rubric(trade_price, retail_price, external_link) :
-
-            current_rubric, created = Rubric.objects.get_or_create(name=name)
-            
+        if is_empty_row(rowValues) : 
+            break
+        elif is_rubric(rowValues) :
+            current_rubric, created = store_rubric(rowValues)
+            inc_rubrics(stats)
+        elif is_product(rowValues):
+            store_product(rowValues)
             inc_products(stats)
-
         else:
-
-            product, created = Product.objects.get_or_create(name=name)
-
-            if is_by_order(trade_price) :
-                product.by_order = True
-                product.trade_price=0
-            else:
-                product.trade_price = get_float(trade_price)
-
-            product.retail_price=get_float(retail_price)
-
-            product.external_link = external_link
-
-            product.created_by=request.user
-            product.updated_by=request.user
-
-            product.rubrics.add(current_rubric)
-
-            product.get_external_desc()
-            product.save()
-
-            inc_products(stats)
+            continue
 
     return stats
 
