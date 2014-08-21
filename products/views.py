@@ -10,6 +10,9 @@ import uuid
 import urllib
 import xlrd
 
+CHILD_RUBRIC_COLOR = 23
+PARENT_RUBRIC_COLOR = 63
+
 def get_path(fpath):
     return os.path.join(settings.MEDIA_ROOT, fpath)
 
@@ -77,26 +80,44 @@ def inc_products(stats):
 
 def inc_rubrics(stats):
     stats["rubrics"] += 1
+    
+def is_main_rubric(wb, row):
+    wb.xf_list[row[0].xf_index].background.pattern_colour_index == PARENT_RUBRIC_COLOR
+
+def is_child_rubric(wb, row):
+    wb.xf_list[row[0].xf_index].background.pattern_colour_index == CHILD_RUBRIC_COLOR
 
 def parse_name(fullname, user):
     parts = fullname.split("|")
     parts = [i.strip() for i in parts]
 
     name = parts[1] if len(parts) >= 2 else ""
-    vendor, created = Vendor.objects.get_or_create(name=parts[0], updated_by=user) if len(parts) >= 1 else ("", False)
+    
+    vendor, created = Vendor.objects.get_or_create(name=parts[0]) if len(parts) >= 1 else ("", False)
+    
     if created :
         vendor.created_by = user
-        vendor.save()
+        
+    vendor.updated_by = user    
+    vendor.save()
+    
     short_desc = parts[2] if len(parts) >= 3 else ""
 
     return (name, vendor, short_desc)
 
-def store_rubric(r, user):
+def store_rubric(r, user, parent=None):
     name = get_name(r)
-    rubric, created = Rubric.objects.get_or_create(name=name, updated_by=user)
+    
+    if parent is not None :
+        rubric, created = Rubric.objects.get_or_create(name=name, parent=parent)
+    else:
+        rubric, created = Rubric.objects.get_or_create(name=name, parent__is_null=True)
+    
+    rubric.updated_by = user
     if created :
         rubric.created_by = user
-        rubric.save()
+        
+    rubric.save()
     return (rubric, created)
 
 def store_product(rowValues, ws, row, user, current_rubric):
@@ -149,6 +170,7 @@ def parse_xlsx_xlrd(f, request):
     ws = wb.sheet_by_index(0)
 
     current_rubric = None
+    parent = None
 
     stats = make_stats()
 
@@ -158,7 +180,14 @@ def parse_xlsx_xlrd(f, request):
         if is_empty_row(rowValues) :
             break
         if is_rubric(rowValues) :
-            current_rubric, created = store_rubric(rowValues, request.user)
+            
+            if is_main_rubric(wb, row) :
+                parent = None
+                
+            if is_child_rubric(wb, row) :
+                parent = current_rubric
+            
+            current_rubric, created = store_rubric(rowValues, request.user, parent)
             inc_rubrics(stats)
         if is_product(rowValues):
             store_product(rowValues, ws, row, request.user, current_rubric)
