@@ -154,7 +154,7 @@ class Product(models.Model) :
             os.remove("%s200" % fpath)
             os.remove("%s500" % fpath)
 
-    def store(self, vendor=None, desc = "", short_desc="", trade_price=0, retail_price=0, is_by_order=False, external_link="", current_rubric=None, created_by=None, updated_by=None) :
+    def store(self, vendor=None, desc = "", short_desc="", trade_price=0, retail_price=0, is_by_order=False, external_link="", is_new=False, is_special_price=False, current_rubric=None, created_by=None, updated_by=None) :
         print "----", vendor
         self.vendor = vendor
 
@@ -168,6 +168,9 @@ class Product(models.Model) :
         self.retail_price=retail_price
 
         self.external_link = external_link
+        
+        self.is_new = is_new
+        self.is_special_price = is_special_price
 
         if created_by :
             self.created_by = created_by

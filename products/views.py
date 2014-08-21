@@ -12,6 +12,8 @@ import xlrd
 
 CHILD_RUBRIC_COLOR = 23
 PARENT_RUBRIC_COLOR = 63
+SPECIAL_PRICE = 40
+IS_NEW = 42
 
 def get_path(fpath):
     return os.path.join(settings.MEDIA_ROOT, fpath)
@@ -86,6 +88,12 @@ def is_main_rubric(wb, row):
 
 def is_child_rubric(wb, row):
     wb.xf_list[row[0].xf_index].background.pattern_colour_index == CHILD_RUBRIC_COLOR
+    
+def is_product_special_price(wb, row):
+    wb.xf_list[row[0].xf_index].background.pattern_colour_index == SPECIAL_PRICE
+    
+def is_product_new(wb, row):
+    wb.xf_list[row[0].xf_index].background.pattern_colour_index == IS_NEW
 
 def parse_name(fullname, user):
     parts = fullname.split("|")
@@ -120,7 +128,7 @@ def store_rubric(r, user, parent=None):
     rubric.save()
     return (rubric, created)
 
-def store_product(rowValues, ws, row, user, current_rubric):
+def store_product(rowValues, ws, row, user, current_rubric, wb):
 
     name = get_name(rowValues)
     trade_price = get_trade_price(rowValues)
@@ -137,6 +145,8 @@ def store_product(rowValues, ws, row, user, current_rubric):
     desc = get_external_desc(external_link) if external_link and created else ""
 
     created_by = user if created else None
+    
+    is_new, is_special_price = is_product_new(wb, row), is_product_special_price(wb, row)
 
     product.store(vendor=vendor,
                     short_desc=short_desc,
@@ -144,6 +154,8 @@ def store_product(rowValues, ws, row, user, current_rubric):
                     trade_price=trade_price,
                     retail_price=retail_price,
                     external_link=external_link,
+                    is_new = is_new,
+                    is_special_price=is_special_price,
                     created_by=created_by,
                     updated_by=user,
                     current_rubric=current_rubric)
@@ -190,7 +202,7 @@ def parse_xlsx_xlrd(f, request):
             current_rubric, created = store_rubric(rowValues, request.user, parent)
             inc_rubrics(stats)
         if is_product(rowValues):
-            store_product(rowValues, ws, row, request.user, current_rubric)
+            store_product(rowValues, ws, row, request.user, current_rubric, wb)
             inc_products(stats)
 
     return stats
