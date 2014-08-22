@@ -85,16 +85,16 @@ def inc_rubrics(stats):
     stats["rubrics"] += 1
     
 def is_main_rubric(wb, row):
-    wb.xf_list[row[0].xf_index].background.pattern_colour_index == PARENT_RUBRIC_COLOR
+    return wb.xf_list[row[0].xf_index].background.pattern_colour_index == PARENT_RUBRIC_COLOR
 
 def is_child_rubric(wb, row):
-    wb.xf_list[row[0].xf_index].background.pattern_colour_index == CHILD_RUBRIC_COLOR
+    return wb.xf_list[row[0].xf_index].background.pattern_colour_index == CHILD_RUBRIC_COLOR
     
 def is_product_special_price(wb, row):
-    wb.xf_list[row[0].xf_index].background.pattern_colour_index == SPECIAL_PRICE
+    return wb.xf_list[row[0].xf_index].background.pattern_colour_index == SPECIAL_PRICE
     
 def is_product_new(wb, row):
-    wb.xf_list[row[0].xf_index].background.pattern_colour_index == IS_NEW
+    return wb.xf_list[row[0].xf_index].background.pattern_colour_index == IS_NEW
     
 def is_recommend_price(wb, row):
     return wb.font_list[wb.xf_list[row[2].xf_index].font_index].colour_index == RECOMMEND_PRICE
