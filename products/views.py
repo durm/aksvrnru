@@ -14,6 +14,7 @@ CHILD_RUBRIC_COLOR = 23
 PARENT_RUBRIC_COLOR = 63
 SPECIAL_PRICE = 40
 IS_NEW = 42
+RECOMMEND_PRICE = 10
 
 def get_path(fpath):
     return os.path.join(settings.MEDIA_ROOT, fpath)
@@ -94,6 +95,9 @@ def is_product_special_price(wb, row):
     
 def is_product_new(wb, row):
     wb.xf_list[row[0].xf_index].background.pattern_colour_index == IS_NEW
+    
+def is_recommend_price(wb, row):
+    return wb.font_list[wb.xf_list[row[2].xf_index].font_index].colour_index == RECOMMEND_PRICE
 
 def parse_name(fullname, user):
     parts = fullname.split("|")
