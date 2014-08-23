@@ -21,10 +21,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '=18m%uc2k%c$0=f_#k^2vjm@se9e%lo9i=d@!a^v_n^qdkyj6o'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
 TEMPLATE_DEBUG = True
+
+TEMPLATE_DIRS = (
+    BASE_DIR + '/templates/'
+)
 
 ALLOWED_HOSTS = []
 
@@ -38,8 +39,14 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'products'
+    'products',
+    'kombu.transport.django',
+    'djcelery',
 )
+
+CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+CELERY_CONCURRENCY = 2
+BROKER_URL = 'django://'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -64,12 +71,16 @@ MEDIA_URL = "/media/"
 if os.path.exists(os.path.expanduser("~/aks_db.conf")):
     MEDIA_ROOT = os.path.expanduser("~/media/aksvrnru")
     dbconf = open(os.path.expanduser("~/aks_db.conf"), "r")
+    DEBUG = True
 else:
     MEDIA_ROOT = os.path.expanduser("/home/aksdjang/media/aksvrnru")
     dbconf = open(os.path.expanduser("/home/aksdjang/aks_db.conf"), "r")
+    DEBUG = False
 
 
 default_engine = eval(dbconf.read().strip())
+dbconf.close()
+
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 WATER_MARK = os.path.join(STATIC_ROOT, "watermark.png")
 

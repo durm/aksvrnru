@@ -2,13 +2,16 @@
 
 from django.contrib import admin
 from products.models import *
-from products.views import proc
+from products.tasks import proc
 import threading
+
+def not_set(obj, attrib):
+    return not hasattr(obj, attrib) or (hasattr(obj, attrib) and getattr(obj, attrib) is None)
+
 
 def proc_list(modeladmin, request, queryset):
     for obj in queryset :
-        #threading.Thread(target=proc, args=(request, obj)).start()
-        proc(request, obj)
+        proc.delay(request, obj)
 
 proc_list.short_description = "Распарсить выделенные прайсы"
 
@@ -38,11 +41,9 @@ class PriceAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
 
-        if not hasattr(obj, 'created_by') or (hasattr(obj, 'created_by') and obj.created_by is None) :
-
+        if not_set(obj, "created_by") :
             obj.created_by = request.user
 
-        obj.processed_by = request.user
         obj.updated_by = request.user
 
         obj.save()
@@ -51,20 +52,19 @@ class PriceAdmin(admin.ModelAdmin):
 
 class ProductAdmin(admin.ModelAdmin):
 
-    list_display = ('name', 'vendor', 'short_desc')
-    list_filter = ('by_order', 'is_new', 'is_special_price')
+    list_display = ('name', 'vendor', 'short_desc', 'trade_price', 'retail_price')
+    list_filter = ('by_order', 'is_new', 'is_special_price', 'is_recommend_price')
     search_fields = ['name']
 
-    fields = ['name', 'vendor', 'short_desc', 'desc', 'image', 'rubrics', 'trade_price', 'retail_price', 'recommend_price',
-        'amount', 'external_link', 'by_order', 'is_new', 'is_special_price',
+    fields = ['name', 'vendor', 'short_desc', 'desc', 'image', 'rubrics', 'trade_price', 'retail_price', 'is_recommend_price',
+        'external_link', 'by_order', 'is_new', 'is_special_price',
         'created_at', 'created_by' , 'updated_at' , 'updated_by']
 
     readonly_fields = ['created_by', 'created_at', 'updated_by', 'updated_at']
 
     def save_model(self, request, obj, form, change):
 
-        if not hasattr(obj, 'created_by') or (hasattr(obj, 'created_by') and obj.created_by is None) :
-
+        if not_set(obj, "created_by") :
             obj.created_by = request.user
 
         obj.updated_by = request.user
@@ -76,8 +76,7 @@ class RubricAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
 
-        if not hasattr(obj, 'created_by') or (hasattr(obj, 'created_by') and obj.created_by is None) :
-
+        if not_set(obj, "created_by") :
             obj.created_by = request.user
 
         obj.updated_by = request.user
@@ -89,8 +88,7 @@ class VendorAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
 
-        if not hasattr(obj, 'created_by') or (hasattr(obj, 'created_by') and obj.created_by is None) :
-
+        if not_set(obj, "created_by") :
             obj.created_by = request.user
 
         obj.updated_by = request.user

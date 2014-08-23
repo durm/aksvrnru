@@ -16,7 +16,7 @@ price_parsing_result = (
 
 class Price(models.Model):
 
-    name = models.CharField(max_length=255, verbose_name="Название", unique=True)
+    name = models.CharField(max_length=255, verbose_name="Название")
     desc = models.TextField(blank=True, verbose_name="Описание")
 
     file = models.FileField(upload_to='prices', verbose_name="Файл")
@@ -68,7 +68,7 @@ class Price(models.Model):
         verbose_name = "Прайс"
 
 class Rubric(models.Model):
-    name = models.CharField(max_length=255, verbose_name="Название", unique=True)
+    name = models.CharField(max_length=255, verbose_name="Название")
     desc = models.TextField(blank=True, verbose_name="Описание")
     parent = models.ForeignKey('self', null=True, blank=True, verbose_name="Родительская рубрика")
 
@@ -81,11 +81,17 @@ class Rubric(models.Model):
     def __unicode__(self):
         return "%s" % (self.name)
 
+    def has_children(self):
+        return len(Rubric.objects.filter(parent=self)[:1]) == 1
+
+    def children(self):
+        return Rubric.objects.filter(parent=self)
+
     class Meta :
         verbose_name = "Рубрика"
 
 class Vendor(models.Model):
-    name = models.CharField(max_length=255, verbose_name="Название", unique=True)
+    name = models.CharField(max_length=255, verbose_name="Название")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     created_by = models.ForeignKey(User, related_name='+cr+', blank=True, null=True, verbose_name="Создал")
@@ -101,7 +107,7 @@ class Vendor(models.Model):
 
 class Product(models.Model) :
 
-    name = models.CharField(max_length=255, verbose_name="Название", unique=True)
+    name = models.CharField(max_length=255, verbose_name="Название")
     vendor = models.ForeignKey(Vendor, verbose_name="Производитель", null=True, blank=True)
 
     short_desc = models.TextField(blank=True, null=True, verbose_name="Краткое описание")
@@ -111,7 +117,7 @@ class Product(models.Model) :
 
     trade_price = models.FloatField(default=0, verbose_name="Оптовая цена")
     retail_price = models.FloatField(default=0, verbose_name="Розничная цена")
-    recommend_price = models.FloatField(default=0, verbose_name="Рекомендованная цена")
+    is_recommend_price = models.BooleanField(default=False, verbose_name="Рекомендованная цена")
 
     amount = models.IntegerField(default=0, verbose_name="Количество")
 
@@ -154,8 +160,21 @@ class Product(models.Model) :
             os.remove("%s200" % fpath)
             os.remove("%s500" % fpath)
 
-    def store(self, vendor=None, desc = "", short_desc="", trade_price=0, retail_price=0, is_by_order=False, external_link="", is_new=False, is_special_price=False, current_rubric=None, created_by=None, updated_by=None) :
-        print "----", vendor
+    def store(self,
+                vendor=None,
+                desc = "",
+                short_desc="",
+                trade_price=0,
+                retail_price=0,
+                is_by_order=False,
+                external_link="",
+                is_new=False,
+                is_special_price=False,
+                is_recommend_price=False,
+                current_rubric=None,
+                created_by=None,
+                updated_by=None) :
+
         self.vendor = vendor
 
         self.short_desc = short_desc
@@ -168,9 +187,11 @@ class Product(models.Model) :
         self.retail_price=retail_price
 
         self.external_link = external_link
-        
+
         self.is_new = is_new
         self.is_special_price = is_special_price
+
+        self.is_recommend_price = is_recommend_price
 
         if created_by :
             self.created_by = created_by

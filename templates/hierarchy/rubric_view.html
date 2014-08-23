@@ -1,0 +1,7 @@
+<li>{{rubric.name}}
+    {%if rubric.has_children %}
+        {%with rubrics=rubric.children template_name="hierarchy/rubric_roots.html" %}
+             {%include template_name%}
+        {%endwith%}
+    {%endif%}
+</li>
