@@ -27,7 +27,7 @@ TEMPLATE_DIRS = (
     BASE_DIR + '/templates/'
 )
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['aks.djangohost.name']
 
 
 # Application definition
