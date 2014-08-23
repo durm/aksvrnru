@@ -145,6 +145,7 @@ def store_rubric(r, user, parent=None):
 
     rubric.updated_by = user
     if created :
+        rubric.is_published = True
         rubric.created_by = user
 
     rubric.save()
@@ -174,15 +175,17 @@ def store_product(rowValues, ws, row, user, current_rubric, wb):
 
     product, created = Product.objects.get_or_create(name=name)
 
-    desc = ""
+    is_published = True if product.is_published else False
 
     created_by = user if created else None
 
     is_new, is_special_price, is_recommend_price = is_product_new(wb, ws, row), is_product_special_price(wb, ws, row), is_price_recommend(wb, ws, row)
 
+    if created :
+        product.is_published = True
+
     product.store(vendor=vendor,
                     short_desc=short_desc,
-                    desc=desc,
                     is_by_order=by_order,
                     trade_price=trade_price,
                     retail_price=retail_price,
@@ -190,6 +193,7 @@ def store_product(rowValues, ws, row, user, current_rubric, wb):
                     is_new = is_new,
                     is_special_price=is_special_price,
                     is_recommend_price=is_recommend_price,
+                    is_published=is_published,
                     created_by=created_by,
                     updated_by=user,
                     current_rubric=current_rubric)
@@ -240,6 +244,11 @@ def parse_xlsx_xlrd(f, request):
 
             inc_rubrics(stats)
         if is_product(rowValues):
+
+            if current_rubric.skip :
+                continue
+                pass
+
             store_product(rowValues, ws, row, request.user, current_rubric, wb)
             inc_products(stats)
 

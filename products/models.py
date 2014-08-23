@@ -78,6 +78,9 @@ class Rubric(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата изменения")
     updated_by = models.ForeignKey(User, related_name='+up+', blank=True, null=True, verbose_name="Изменил")
 
+    is_published = models.BooleanField(default=False, verbose_name="Опубликована")
+    skip = models.BooleanField(default=False, verbose_name="Не обновлять из прайса")
+
     def __unicode__(self):
         return "%s" % (self.name)
 
@@ -136,6 +139,8 @@ class Product(models.Model) :
 
     rubrics = models.ManyToManyField(Rubric, blank=True, null=True, verbose_name="Рубрики")
 
+    is_published = models.BooleanField(default=False, verbose_name="Опубликован")
+
     def get_full_image_path(self):
         if self.image :
             return os.path.join(settings.MEDIA_ROOT, self.image.name)
@@ -171,6 +176,7 @@ class Product(models.Model) :
                 is_new=False,
                 is_special_price=False,
                 is_recommend_price=False,
+                is_published=False,
                 current_rubric=None,
                 created_by=None,
                 updated_by=None) :
@@ -190,6 +196,8 @@ class Product(models.Model) :
 
         self.is_new = is_new
         self.is_special_price = is_special_price
+
+        self.is_published = is_published
 
         self.is_recommend_price = is_recommend_price
 
