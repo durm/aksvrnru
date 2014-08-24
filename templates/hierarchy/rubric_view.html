@@ -1,4 +1,4 @@
-<li>{{rubric.name}}
+<li><a href="#">{{rubric.name}}</a>
     {%if rubric.has_children %}
         {%with rubrics=rubric.children template_name="hierarchy/rubric_roots.html" %}
              {%include template_name%}

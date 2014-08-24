@@ -1,0 +1,16 @@
+{% load staticfiles %}
+
+  <div class="col-6 col-sm-6 col-lg-4">
+    <div class="thumbnail special_product">
+        <img src="{% static 'no-photo.png' %}"  data-src="holder.js/300x300" class="img-responsive" alt="Responsive image"/>
+
+      <div class="caption">
+        <h4>{{ prd.name }}</h4>
+        <p>{{ prd.short_desc }}</p>
+        <p>{{ prd.retail_price }} руб.</p>
+        <p>
+            <a class="btn btn-default" href="#" role="button">Подробнее &raquo;</a>
+        </p>
+</div>
+    </div>
+  </div>

@@ -40,6 +40,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'products',
+    'markdown_deux',
+    'pages',
     'kombu.transport.django',
     'djcelery',
 )
@@ -81,7 +83,7 @@ else:
 default_engine = eval(dbconf.read().strip())
 dbconf.close()
 
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = "stats"
 WATER_MARK = os.path.join(STATIC_ROOT, "watermark.png")
 
 DATABASES = {
@@ -107,3 +109,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
+
+STATICFILES_DIRS = (
+os.path.join(BASE_DIR, "static"),
+)
