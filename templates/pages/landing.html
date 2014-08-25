@@ -15,11 +15,13 @@
             <h1>Спецпредложения</h1>
             <p>Найдётся всё!</p>
           </div>
+          {% if special_price_products %}
           <div class="row" class="special_products">
               {% for prd in special_price_products %}
                   {% include "pages/special_product_view.html" %}
               {% endfor %}
           </div><!--/row-->
+          {% endif %}
         </div><!--/span-->
       </div>
   </div>

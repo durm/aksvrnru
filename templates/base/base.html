@@ -44,7 +44,7 @@
           </ul>
           <ul class="pull-right nav navbar-nav">
               {% if user.is_authenticated %}
-                  <li><a href="">
+                  <li><a href="{% url 'me' %}">
                   {% if user.first_name and user.last_name %}
                       {{ user.first_name }} {{ user.last_name }}
                   {% else %}
@@ -52,7 +52,7 @@
                 {% endif %}
                   </a></li>
               {% else %}
-                  <li><a href="">Войти</a></li>
+                  <li><a href="{% url 'login_page' %}">Войти</a></li>
               {% endif %}
           </ul>
         </div><!--/.nav-collapse -->
