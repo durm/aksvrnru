@@ -78,7 +78,7 @@ if os.path.exists(os.path.expanduser("~/aks_db.conf")):
 else:
     MEDIA_ROOT = os.path.expanduser("/home/aksdjang/media/aksvrnru")
     dbconf = open(os.path.expanduser("/home/aksdjang/aks_db.conf"), "r")
-    DEBUG = False
+    DEBUG = True #False
 
 
 default_engine = eval(dbconf.read().strip())
