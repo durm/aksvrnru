@@ -19,7 +19,7 @@ def login_page(request):
         return render_to_response("pages/login_page.html", c)
 
 def login_proc(request):
-    user = authenticate(username=request.POST.get("login"), password=request.POST.get("passwd"))
+    user = authenticate(username=request.POST.get("username"), password=request.POST.get("passwd"))
     if user is not None:
         if user.is_active:
             login(request, user)
@@ -53,7 +53,6 @@ def signup(request):
         return redirect(reverse('me'))
     else:
         username = request.POST.get("username")
-        print username
         try:
             User.objects.get(username=username)
             return error(request, "Ошибка", "Имя пользователя %s занято." % str(username))
@@ -68,10 +67,11 @@ def signup(request):
         user = User.objects.create_user(username, email, request.POST.get("passwd"))
         user.first_name = request.POST.get("first_name")
         user.second_name = request.POST.get("second_name")
+        user.is_active = True
+        user.is_staff = False
+        user.is_superuser = False
         user.save()
         user_profile, created = UserProfile.objects.get_or_create(user=user)
         user_profile.phone = request.POST.get("phone")
         user_profile.save()
-        user = authenticate(username=username, password=request.POST.get("passwd"))
-        login(request, user)
-        return redirect(reverse('me'))
+        return login_proc(request)
