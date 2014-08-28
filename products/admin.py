@@ -14,7 +14,7 @@ def proc_list(modeladmin, request, queryset):
         threading.Thread(target=proc, args=(request, obj)).start()
         #proc.delay(request, obj)
 
-proc_list.short_description = u"Распарсить выделенные прайсы"
+proc_list.short_description = "Распарсить выделенные прайсы"
 
 class PriceAdmin(admin.ModelAdmin):
 
