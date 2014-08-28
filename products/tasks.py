@@ -156,7 +156,7 @@ def update_product_with_external_desc(product):
 
     print "Update prd external desc %s" % str(product.id)
 
-    if not product.external_link : return
+    if not product.external_link or product.desc : return
 
     product.desc = get_external_desc(product.external_link)
     product.save()

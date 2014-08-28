@@ -54,14 +54,14 @@ class PriceAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'vendor', 'short_desc', 'trade_price', 'retail_price')
-    list_filter = ('by_order', 'is_new', 'is_special_price', 'is_recommend_price')
+    list_filter = ('by_order', 'is_new', 'is_special_price', 'is_recommend_price', 'is_valid', 'is_published')
     search_fields = ['name']
 
-    fields = ['name', 'vendor', 'short_desc', 'desc', 'image', 'rubrics', 'trade_price', 'retail_price', 'is_recommend_price',
+    fields = ['name', 'vendor', 'short_desc', 'desc', 'image', 'rubrics', 'trade_price', 'retail_price', 'retail_price_in_price', 'is_valid', 'is_published', 'is_recommend_price',
         'external_link', 'by_order', 'is_new', 'is_special_price',
         'created_at', 'created_by' , 'updated_at' , 'updated_by']
 
-    readonly_fields = ['created_by', 'created_at', 'updated_by', 'updated_at']
+    readonly_fields = ['retail_price_in_price', 'is_valid', 'created_by', 'created_at', 'updated_by', 'updated_at']
 
     def save_model(self, request, obj, form, change):
 
@@ -69,6 +69,7 @@ class ProductAdmin(admin.ModelAdmin):
             obj.created_by = request.user
 
         obj.updated_by = request.user
+        obj.check_and_set_validation()
         obj.save()
 
 class RubricAdmin(admin.ModelAdmin):

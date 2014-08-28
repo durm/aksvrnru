@@ -17,69 +17,14 @@
         }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>
 </head>
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="{% url 'home' %}">
-          {% if pages_settings %}{{pages_settings.site_name}}{% else %}Aksvrn{% endif %}
-          </a>
-        </div>
-        <div class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-              {% for tp in pages_settings.top_menu.all %}
-                  <li><a href="{% url 'get_page' tp.id %}">{{tp.title}}</a></li>
-              {% endfor %}
-          </ul>
-          <ul class="pull-right nav navbar-nav">
-              {% if user.is_authenticated %}
-                  <li><a href="#"  class="dropdown-toggle" data-toggle="dropdown">
-                  {% if user.first_name and user.last_name %}
-                      {{ user.first_name }} {{ user.last_name }}
-                  {% else %}
-                      {{ user.username }}
-                {% endif %}
-                  </a>
-                  <ul class="dropdown-menu" role="menu">
-                    <li><a href="{% url 'me' %}">Профиль</a></li>
-                    <li><a href="{% url 'logout_view' %}">Выйти</a></li>
-                  </ul>
-                  </li>
-              {% else %}
-                  <li><a href="{% url 'login_page' %}">Войти</a></li>
-              {% endif %}
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </div>
-
-
-
+    {% include "base/parts/header.html" %}
     {% block content %}{% endblock %}
     <hr/>
-    <div class="container">
-    <ul class="list-inline">
-    {% if pages_settings %}<li>{{pages_settings.copyright}}</li>{% endif %}
-      <li>
-          <a href="{% url 'rubrics_hierarchy' %}">Рубрики</a>
-      </li>
-      {% for tp in pages_settings.bottom_menu.all %}
-          <li><a href="{% url 'get_page' tp.id %}">{{tp.title}}</a></li>
-      {% endfor %}
-    </ul>
-    </div>
-    <!-- Latest compiled and minified JavaScript -->
+    {% include "base/parts/footer.html" %}
     <script src="http://yastatic.net/jquery/2.1.1/jquery.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     {% block libs %}

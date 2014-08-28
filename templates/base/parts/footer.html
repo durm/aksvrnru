@@ -1,0 +1,15 @@
+<div class="container">
+    <ul class="list-inline">
+        {% if pages_settings and pages_settings.copyright %}
+            <li>{{pages_settings.copyright}}</li>
+        {% else %}
+            {{pages_settings.get_default_copyright}}
+        {% endif %}
+        <li>
+        <a href="{% url 'rubrics_hierarchy' %}">Рубрики</a>
+        </li>
+        {% for tp in pages_settings.bottom_menu.all %}
+            <li><a href="{% url 'get_page' tp.id %}">{{tp.title}}</a></li>
+        {% endfor %}
+    </ul>
+</div>

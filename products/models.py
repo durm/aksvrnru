@@ -14,6 +14,10 @@ price_parsing_result = (
     ('process', 'В процессе'),
 )
 
+MIN_PRICE = 1500
+MIN_DIFF = 300
+PRICE_PERCENT = 0.8
+
 class Price(models.Model):
 
     name = models.CharField(max_length=255, verbose_name="Название")
@@ -120,6 +124,8 @@ class Product(models.Model) :
 
     trade_price = models.FloatField(default=0, verbose_name="Оптовая цена")
     retail_price = models.FloatField(default=0, verbose_name="Розничная цена")
+    retail_price_in_price = models.FloatField(default=0, verbose_name="Розничная цена")
+    
     is_recommend_price = models.BooleanField(default=False, verbose_name="Рекомендованная цена")
 
     amount = models.IntegerField(default=0, verbose_name="Количество")
@@ -138,6 +144,8 @@ class Product(models.Model) :
     updated_by = models.ForeignKey(User, related_name='+up+', blank=True, null=True, verbose_name="Изменил")
 
     rubrics = models.ManyToManyField(Rubric, blank=True, null=True, verbose_name="Рубрики")
+    
+    is_valid = models.BooleanField(default=False, verbose_name="Валиден")
 
     is_published = models.BooleanField(default=False, verbose_name="Опубликован")
 
@@ -158,6 +166,28 @@ class Product(models.Model) :
             add_watermark(fpath500, settings.WATER_MARK, fpath500)
 
             add_watermark(fpath, settings.WATER_MARK, fpath)
+    
+    def get_retail_trade_diff(self):
+        return self.retail_price - self.trade_price
+    
+    def valid(self):
+        return self.get_retail_trade_diff() >= 0
+    
+    def check_and_set_validation(self):
+        self.is_valid = self.valid()
+        if not self.is_valid :
+            self.is_published = False
+            
+    def lower_then_minimal_retail_price(self):
+        return self.retail_price < MIN_PRICE
+    
+    def lower_then_minimal_retail_trade_diff(self):
+        return self.get_retail_trade_diff() < MIN_DIFF
+    
+    def calculate_retail_price(self):
+        if self.is_special_price or self.lower_then_minimal_retail_price() or self.lower_then_minimal_retail_trade_diff() :
+            return
+        self.retail_price = self.get_retail_trade_diff() * PRICE_PERCENT + self.trade_price
 
     def delete_thumbnails(self):
         if self.image :
@@ -190,7 +220,12 @@ class Product(models.Model) :
 
         self.by_order = is_by_order
 
-        self.retail_price=retail_price
+        self.retail_price = retail_price
+        self.retail_price_in_price = retail_price
+        
+        self.check_and_set_validation()
+        if self.is_valid :
+            self.calculate_retail_price()
 
         self.external_link = external_link
 
@@ -206,6 +241,8 @@ class Product(models.Model) :
         self.updated_by = updated_by
 
         self.rubrics.add(current_rubric)
+
+        self.check_and_set_validation()
 
         self.save()
 

@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 
 from django.db import models
+from datetime import date
 
 class Page(models.Model):
     title = models.CharField(max_length=255, verbose_name="Краткое название")
@@ -22,12 +23,6 @@ class Page(models.Model):
         verbose_name = "Страницы"
 
 class AbstractSettings(models.Model):
-    site_name = models.CharField(max_length=255, verbose_name="Название сайта")
-    copyright = models.CharField(max_length=255, verbose_name="Копирайт")
-
-    top_menu = models.ManyToManyField(Page, null=True, blank=True, verbose_name="Верхнее меню", related_name="+tm")
-    bottom_menu = models.ManyToManyField(Page, null=True, blank=True, verbose_name="Нижнее меню", related_name="+bm")
-
     class Meta:
         abstract = True
 
@@ -43,6 +38,20 @@ class AbstractSettings(models.Model):
             return cls()
 
 class PagesSettings(AbstractSettings):
+    site_name = models.CharField(max_length=255, verbose_name="Название сайта")
+    copyright = models.CharField(max_length=255, verbose_name="Копирайт", null=True, blank=True)
 
-
-    pass
+    top_menu = models.ManyToManyField(Page, null=True, blank=True, verbose_name="Верхнее меню", related_name="+tm")
+    bottom_menu = models.ManyToManyField(Page, null=True, blank=True, verbose_name="Нижнее меню", related_name="+bm")
+    
+    jumbotron_h = models.CharField(max_length=128, verbose_name="Джамб-название")
+    jumbotron_p = models.CharField(max_length=255, verbose_name="Джамб-предложение")
+    
+    def get_default_copyright(self):
+        return "%s (c) %s" % (str(date.today().year), str("Copyright"))
+    
+    def __unicode__(self):
+        return u"Настройки"
+    
+    class Meta :
+        verbose_name = "Настройки"
