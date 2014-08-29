@@ -23,7 +23,7 @@ class Price(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название")
     desc = models.TextField(blank=True, verbose_name="Описание")
 
-    file = models.FileField(upload_to='prices', verbose_name="Файл")
+    file = models.FileField(upload_to=u'prices', verbose_name="Файл")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     created_by = models.ForeignKey(User, related_name='+cr+', blank=True, null=True, verbose_name="Создал")
@@ -120,7 +120,7 @@ class Product(models.Model) :
     short_desc = models.TextField(blank=True, null=True, verbose_name="Краткое описание")
     desc = models.TextField(blank=True, null=True, verbose_name="Полное описание")
 
-    image = models.ImageField(upload_to='products', verbose_name="Изображение", null=True, blank=True)
+    image = models.ImageField(upload_to=u'products', verbose_name="Изображение", null=True, blank=True)
 
     trade_price = models.FloatField(default=0, verbose_name="Оптовая цена")
     retail_price = models.FloatField(default=0, verbose_name="Розничная цена")
@@ -170,11 +170,14 @@ class Product(models.Model) :
     def get_retail_trade_diff(self):
         return self.retail_price - self.trade_price
     
-    def valid(self):
-        return self.get_retail_trade_diff() >= 0
+    def validate(self):
+        if self.by_order or ( self.trade_price == 0 or self.retail_price == 0 ) :
+            return True
+        else:
+            return self.get_retail_trade_diff() >= 0
     
     def check_and_set_validation(self):
-        self.is_valid = self.valid()
+        self.is_valid = self.validate()
         if not self.is_valid :
             self.is_published = False
             
@@ -184,8 +187,11 @@ class Product(models.Model) :
     def lower_then_minimal_retail_trade_diff(self):
         return self.get_retail_trade_diff() < MIN_DIFF
     
+    def skip_calculation(self):
+        return not self.is_valid or self.is_recommend_price or ( self.trade_price == 0 or self.retail_price == 0 ) or self.lower_then_minimal_retail_price() or self.lower_then_minimal_retail_trade_diff()
+    
     def calculate_retail_price(self):
-        if self.is_special_price or self.lower_then_minimal_retail_price() or self.lower_then_minimal_retail_trade_diff() :
+        if self.skip_calculation() :
             return
         self.retail_price = self.get_retail_trade_diff() * PRICE_PERCENT + self.trade_price
 

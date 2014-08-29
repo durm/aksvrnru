@@ -175,7 +175,7 @@ def store_product(rowValues, ws, row, user, current_rubric, wb):
 
     product, created = Product.objects.get_or_create(name=name)
 
-    is_published = True if product.is_published else False
+    is_published = True if product.is_published or created else False
 
     created_by = user if created else None
 
