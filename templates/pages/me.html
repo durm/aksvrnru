@@ -13,6 +13,8 @@
         <center>
         <a href="#aboutModal" data-toggle="modal" data-target="#myModal"><img src="{% static 'no-photo.png' %}" name="aboutme" width="140" height="140" class="img-circle"/></a>
         <h3>{{ user.username }}</h3>
+        <h4>{{ user.get_full_name }}</h4>
+        <a href="{% url 'edit_profile_view' %}">Редактировать данные</a>
         </center>
     </div>
 {% endblock %}

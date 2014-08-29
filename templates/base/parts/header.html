@@ -27,11 +27,7 @@
                 {% if user.is_authenticated %}
                     <li>
                         <a href="#"  class="dropdown-toggle" data-toggle="dropdown">
-                            {% if user.first_name and user.last_name %}
-                                {{ user.first_name }} {{ user.last_name }}
-                            {% else %}
-                                {{ user.username }}
-                            {% endif %}
+                            {{ user.username }}
                         </a>
                         <ul class="dropdown-menu" role="menu">
                             <li>
