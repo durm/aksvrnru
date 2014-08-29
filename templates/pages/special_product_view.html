@@ -9,7 +9,7 @@
         <p>{{ prd.short_desc }}</p>
         <p>{{ prd.retail_price }} руб.</p>
         <p>
-            <a class="btn btn-default" href="#" role="button">Подробнее &raquo;</a>
+            <a class="btn btn-default" href="{% url 'get_product' prd.id %}" role="button">Подробнее &raquo;</a>
         </p>
 </div>
     </div>

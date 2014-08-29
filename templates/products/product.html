@@ -1,0 +1,14 @@
+{% extends "base/base.html" %}
+
+{% load markdown_deux_tags %}
+
+{% block title %}
+{{product.name}}
+{% endblock %}
+
+{% block content %}
+    <h1 class="post-title">{{product.name}}</h1>
+{% endblock %}
+
+{% block head %}
+{% endblock %}
