@@ -15,7 +15,7 @@ def login_page(request):
     if request.user.is_authenticated() :
         return error(request, "Ошибка", "Пользователь авторизован как %s." % str(request.user.username))
     else:
-        return render_to_response("pages/login_page.html")
+        return render_to_response("pages/login_page.html", context_instance = get_context(request))
 
 def login_proc(request):
     user = authenticate(username=request.POST.get("username"), password=request.POST.get("passwd"))
@@ -91,3 +91,10 @@ def edit_profile(request):
     else:
         return redirect(reverse('login_page'))
         
+def edit_profile_passwd(request):
+    if request.user.is_authenticated() :
+        request.user.set_password(request.POST.get("passwd"))
+        request.user.save()
+        return redirect(reverse('edit_profile_view'))
+    else:
+        return redirect(reverse('login_page'))

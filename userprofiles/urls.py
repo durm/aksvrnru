@@ -11,4 +11,5 @@ urlpatterns = patterns('',
     url(r'^signup/$', 'userprofiles.views.signup', name='signup'),
     url(r'^edit_profile_view/$', 'userprofiles.views.edit_profile_view', name='edit_profile_view'),
     url(r'^edit_profile/$', 'userprofiles.views.edit_profile', name='edit_profile'),
+    url(r'^edit_profile_passwd/$', 'userprofiles.views.edit_profile_passwd', name='edit_profile_passwd'),
 )
