@@ -114,6 +114,7 @@ class Vendor(models.Model):
 
 class Product(models.Model) :
 
+    in_price_desc = models.CharField(max_length=255, verbose_name="Описание в прайсе")
     name = models.CharField(max_length=255, verbose_name="Название")
     vendor = models.ForeignKey(Vendor, verbose_name="Производитель", null=True, blank=True)
 
@@ -123,9 +124,14 @@ class Product(models.Model) :
     image = models.ImageField(upload_to=u'products', verbose_name="Изображение", null=True, blank=True)
 
     trade_price = models.FloatField(default=0, verbose_name="Оптовая цена")
+
     retail_price = models.FloatField(default=0, verbose_name="Розничная цена")
     retail_price_in_price = models.FloatField(default=0, verbose_name="Розничная цена")
-    
+    retail_price_prev = models.FloatField(default=0, verbose_name="Прежняя розн. цена")
+
+    specify_trade_price = models.BooleanField(default=False, verbose_name="Уточните опт. цену")
+    specify_retail_price = models.BooleanField(default=False, verbose_name="Уточните розн. цену")
+
     is_recommend_price = models.BooleanField(default=False, verbose_name="Рекомендованная цена")
 
     amount = models.IntegerField(default=0, verbose_name="Количество")
@@ -144,10 +150,12 @@ class Product(models.Model) :
     updated_by = models.ForeignKey(User, related_name='+up+', blank=True, null=True, verbose_name="Изменил")
 
     rubrics = models.ManyToManyField(Rubric, blank=True, null=True, verbose_name="Рубрики")
-    
+
     is_valid = models.BooleanField(default=False, verbose_name="Валиден")
 
     is_published = models.BooleanField(default=False, verbose_name="Опубликован")
+
+    available = models.BooleanField(default=False, verbose_name="В наличии")
 
     def get_full_image_path(self):
         if self.image :
@@ -166,34 +174,35 @@ class Product(models.Model) :
             add_watermark(fpath500, settings.WATER_MARK, fpath500)
 
             add_watermark(fpath, settings.WATER_MARK, fpath)
-    
+
     def get_retail_trade_diff(self):
         return self.retail_price - self.trade_price
-    
+
     def validate(self):
         if self.by_order or ( self.trade_price == 0 or self.retail_price == 0 ) :
             return True
         else:
             return self.get_retail_trade_diff() >= 0
-    
+
     def check_and_set_validation(self):
         self.is_valid = self.validate()
         if not self.is_valid :
             self.is_published = False
-            
+
     def lower_then_minimal_retail_price(self):
         return self.retail_price < MIN_PRICE
-    
+
     def lower_then_minimal_retail_trade_diff(self):
         return self.get_retail_trade_diff() < MIN_DIFF
-    
+
     def skip_calculation(self):
         return not self.is_valid or self.is_recommend_price or ( self.trade_price == 0 or self.retail_price == 0 ) or self.lower_then_minimal_retail_price() or self.lower_then_minimal_retail_trade_diff()
-    
+
     def calculate_retail_price(self):
         if self.skip_calculation() :
             return
         self.retail_price = self.get_retail_trade_diff() * PRICE_PERCENT + self.trade_price
+        self.check_and_set_validation()
 
     def delete_thumbnails(self):
         if self.image :
@@ -201,54 +210,47 @@ class Product(models.Model) :
             os.remove("%s200" % fpath)
             os.remove("%s500" % fpath)
 
-    def store(self,
-                vendor=None,
-                desc = "",
-                short_desc="",
-                trade_price=0,
-                retail_price=0,
-                is_by_order=False,
-                external_link="",
-                is_new=False,
-                is_special_price=False,
-                is_recommend_price=False,
-                is_published=False,
-                current_rubric=None,
-                created_by=None,
-                updated_by=None) :
+    def store(self, entry) :
 
-        self.vendor = vendor
+        self.in_price_desc = entry.get("in_price_desc", "")
+        self.vendor = entry.get("vendor", None)
 
-        self.short_desc = short_desc
-        self.desc = desc
+        self.name = entry.get("name","")
+        self.short_desc = entry.get("short_desc", "")
+        self.desc = entry.get("desc", "")
 
-        self.trade_price = trade_price
+        self.trade_price = entry.get("trade_price", 0)
 
-        self.by_order = is_by_order
+        self.retail_price_prev = self.retail_price
+        self.retail_price = entry.get("retail_price", 0)
+        self.retail_price_in_price = self.retail_price
 
-        self.retail_price = retail_price
-        self.retail_price_in_price = retail_price
-        
+        self.external_link = entry.get("external_link", "")
+
+        self.is_new = entry.get("is_new", False)
+        self.is_special_price = entry.get("is_special_price", False)
+
+        self.is_published = entry.get("is_published", False)
+
+        self.is_recommend_price = entry.get("is_recommend_price", False)
+
+        self.by_order = entry.get("is_by_order", False)
+
+        self.specify_retail_price = entry.get("specify_retail_price", False)
+        self.specify_trade_price = entry.get("specify_trade_price", False)
+
+        if entry.get("created_by", None) is not None :
+            self.created_by = entry.get("created_by", None)
+
+        self.updated_by = entry.get("updated_by", None)
+
+        self.rubrics.add(entry.get("current_rubric", None))
+
+        self.available = True
+
         self.check_and_set_validation()
         if self.is_valid :
             self.calculate_retail_price()
-
-        self.external_link = external_link
-
-        self.is_new = is_new
-        self.is_special_price = is_special_price
-
-        self.is_published = is_published
-
-        self.is_recommend_price = is_recommend_price
-
-        if created_by :
-            self.created_by = created_by
-        self.updated_by = updated_by
-
-        self.rubrics.add(current_rubric)
-
-        self.check_and_set_validation()
 
         self.save()
 

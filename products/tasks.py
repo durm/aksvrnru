@@ -66,6 +66,9 @@ def is_product(r):
 def is_by_order(v):
     return v == u"Под заказ"
 
+def is_double_dash(v):
+    return v == u"--"
+
 def get_trade_price_and_is_by_order(trade_price):
     if is_by_order(trade_price) :
         return (0, True)
@@ -163,15 +166,14 @@ def update_product_with_external_desc(product):
 
 def store_product(rowValues, ws, row, user, current_rubric, wb):
 
-    name = get_name(rowValues)
+    in_price_desc = get_name(rowValues)
+
     trade_price = get_trade_price(rowValues)
     retail_price = get_retail_price(rowValues)
+
     external_link = get_external_link(ws, row)
 
-    name, vendor, short_desc = parse_name(name, user)
-
-    trade_price, by_order = get_trade_price_and_is_by_order(trade_price)
-    retail_price = get_float(retail_price)
+    name, vendor, short_desc = parse_name(in_price_desc, user)
 
     product, created = Product.objects.get_or_create(name=name)
 
@@ -179,24 +181,39 @@ def store_product(rowValues, ws, row, user, current_rubric, wb):
 
     created_by = user if created else None
 
-    is_new, is_special_price, is_recommend_price = is_product_new(wb, ws, row), is_product_special_price(wb, ws, row), is_price_recommend(wb, ws, row)
+    is_new = is_product_new(wb, ws, row)
+    is_special_price = is_product_special_price(wb, ws, row)
+    is_recommend_price = is_price_recommend(wb, ws, row)
 
-    if created :
-        product.is_published = True
+    prd_by_order = is_by_order(trade_price) or is_by_order(retail_price)
 
-    product.store(vendor=vendor,
-                    short_desc=short_desc,
-                    is_by_order=by_order,
-                    trade_price=trade_price,
-                    retail_price=retail_price,
-                    external_link=external_link,
-                    is_new = is_new,
-                    is_special_price=is_special_price,
-                    is_recommend_price=is_recommend_price,
-                    is_published=is_published,
-                    created_by=created_by,
-                    updated_by=user,
-                    current_rubric=current_rubric)
+    specify_trade_price = is_double_dash(trade_price)
+    specify_retail_price = is_double_dash(retail_price)
+
+    trade_price = get_float(trade_price)
+    retail_price = get_float(retail_price)
+
+    product_entry = {
+        "in_price_desc": in_price_desc,
+        "name": name,
+        "vendor": vendor,
+        "short_desc": short_desc,
+        "external_link": external_link,
+        "is_published": is_published,
+        "created_by": created_by,
+        "updated_by": user,
+        "is_new": is_new,
+        "is_special_price": is_special_price,
+        "is_recommend_price": is_recommend_price,
+        "current_rubric": current_rubric,
+        "is_by_order": prd_by_order,
+        "specify_retail_price": specify_retail_price,
+        "specify_trade_price": specify_trade_price,
+        "trade_price": trade_price,
+        "retail_price": retail_price,
+    }
+
+    product.store(product_entry)
 
     update_product_with_external_desc.delay(product)
 
@@ -204,6 +221,8 @@ def store_product(rowValues, ws, row, user, current_rubric, wb):
 def proc(request, obj):
 
     #if obj.processed() or obj.processing() : return
+
+    Product.objects.all().update(available = False)
 
     obj.set_processing()
 
