@@ -116,7 +116,7 @@ def send_bookcall(request):
 
         return error(request, u"Заказ звонка произведен", u"Ожидайте")
     except Exception as e :
-        return error(request, u"Ошибка", u"Не удалось сделать заказ звонка")
+        return error(request, u"Ошибка", u"Не удалось сделать заказ звонка (%s)" % str(e))
 
 
 def feedback(request):
@@ -137,4 +137,4 @@ def send_feedback(request):
 
         return error(request, u" Сообщение отправлено", u"Ожидайте")
     except Exception as e :
-        return error(request, u"Ошибка", u"Не удалось отправить сообщение")
+        return error(request, u"Ошибка", u"Не удалось отправить сообщение (%s)" % str(e))
