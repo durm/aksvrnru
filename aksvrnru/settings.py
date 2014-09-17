@@ -125,11 +125,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.csrf",
 )
 
-EMAIL_HOST = 'localhost'
-EMAIL_HOST_PASSWORD = ''
-EMAIL_HOST_USER = ''
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_HOST_PASSWORD = 'infopass'
+EMAIL_HOST_USER = 'info@alexkorotkov.ru'
 EMAIL_PORT = 25
-EMAIL_USE_TLS = False
+EMAIL_USE_TLS = True
 
 #NOTES_EMAIL = 'aksesavto@yandex.ru'
 NOTES_EMAIL_FROM = 'durm.icecoffee@gmail.com'
