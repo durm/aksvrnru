@@ -8,6 +8,12 @@
         <li>
         <a href="{% url 'rubrics_hierarchy' %}">Рубрики</a>
         </li>
+        <li>
+        <a href="{% url 'feedback' %}">Обратная связь</a>
+        </li>
+        <li>
+        <a href="{% url 'bookcall' %}">Заказать звонок</a>
+        </li>
         {% for tp in pages_settings.bottom_menu.all %}
             <li><a href="{% url 'get_page' tp.id %}">{{tp.title}}</a></li>
         {% endfor %}

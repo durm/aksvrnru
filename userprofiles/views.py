@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate, login, logout
 from userprofiles.models import *
 from django.template import RequestContext
+from aksvrnru import settings
 
 def login_page(request):
     if request.user.is_authenticated() :
@@ -77,20 +78,20 @@ def edit_profile_view(request):
         return render_to_response("pages/edit_profile.html", context_instance=get_context(request))
     else:
         return redirect(reverse('login_page'))
-    
+
 def edit_profile(request):
     if request.user.is_authenticated() :
         request.user.first_name = request.POST.get("first_name")
         request.user.last_name = request.POST.get("second_name")
         request.user.save()
-        
+
         user_profile, created = UserProfile.objects.get_or_create(user=request.user)
         user_profile.phone = request.POST.get("phone")
         user_profile.save()
         return redirect(reverse('edit_profile_view'))
     else:
         return redirect(reverse('login_page'))
-        
+
 def edit_profile_passwd(request):
     if request.user.is_authenticated() :
         request.user.set_password(request.POST.get("passwd"))
@@ -98,3 +99,42 @@ def edit_profile_passwd(request):
         return redirect(reverse('edit_profile_view'))
     else:
         return redirect(reverse('login_page'))
+
+def bookcall(request):
+    return render_to_response("pages/bookcall.html", get_context(request))
+
+def send_bookcall(request):
+
+    try:
+        name = request.POST.get("name")
+        phone = request.POST.get("phone")
+
+        title = u"AKSVRN | %s заказал звонок" % name
+        message = u"Телефон: %s" % phone
+
+        send_mail(title, message, settings.NOTES_EMAIL_FROM, [settings.NOTES_EMAIL_TO], fail_silently=False)
+
+        return error(request, u"Заказ звонка произведен", u"Ожидайте")
+    except Exception as e :
+        return error(request, u"Ошибка", u"Не удалось сделать заказ звонка")
+
+
+def feedback(request):
+    return render_to_response("pages/feedback.html", get_context(request))
+
+def send_feedback(request):
+
+    try:
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        subject = request.POST.get("subject")
+        message = request.POST.get("message")
+
+        title = u"AKSVRN | %s отправил Вам сообщение (%s)" % (name, subject)
+        message = u"Email: %s;<br/>%s" % (email, message)
+
+        send_mail(title, message, settings.NOTES_EMAIL_FROM, [settings.NOTES_EMAIL_TO], fail_silently=False)
+
+        return error(request, u" Сообщение отправлено", u"Ожидайте")
+    except Exception as e :
+        return error(request, u"Ошибка", u"Не удалось отправить сообщение")

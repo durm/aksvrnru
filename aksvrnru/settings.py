@@ -124,3 +124,13 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.csrf",
 )
+
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER = ''
+EMAIL_PORT = 25
+EMAIL_USE_TLS = False
+
+#NOTES_EMAIL = 'aksesavto@yandex.ru'
+NOTES_EMAIL_FROM = 'durm.icecoffee@gmail.com'
+NOTES_EMAIL_TO = 'durm.icecoffee@gmail.com'
