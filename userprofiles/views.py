@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate, login, logout
 from userprofiles.models import *
 from django.template import RequestContext
 from aksvrnru import settings
+from django.core.mail import send_mail
 
 def login_page(request):
     if request.user.is_authenticated() :
