@@ -113,7 +113,7 @@ def send_bookcall(request):
         title = u"AKSVRN | %s заказал звонок" % name
         message = u"Телефон: %s" % phone
 
-        send_mail(title, message, settings.NOTES_EMAIL_FROM, [settings.NOTES_EMAIL_TO], fail_silently=False)
+        send_mail(title, message, settings.EMAIL_HOST_USER, [settings.NOTES_EMAIL_TO], fail_silently=False)
 
         return error(request, u"Заказ звонка произведен", u"Ожидайте")
     except Exception as e :
@@ -134,7 +134,7 @@ def send_feedback(request):
         title = u"AKSVRN | %s отправил Вам сообщение (%s)" % (name, subject)
         message = u"Email: %s;<br/>%s" % (email, message)
 
-        send_mail(title, message, settings.NOTES_EMAIL_FROM, [settings.NOTES_EMAIL_TO], fail_silently=False)
+        send_mail(title, message, settings.EMAIL_HOST_USER, [settings.NOTES_EMAIL_TO], fail_silently=False)
 
         return error(request, u" Сообщение отправлено", u"Ожидайте")
     except Exception as e :
