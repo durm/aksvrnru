@@ -12,15 +12,16 @@
     {% csrf_token %}
     <legend>Заказать звонок</legend>
   <div class="form-group">
-    <label for="second_name" class="col-sm-2 control-label">Имя *</label>
+    <label for="name" class="col-sm-2 control-label">Имя *</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="second_name" name="second_name" placeholder="Имя" value="{{ user.last_name }}" required>
+      <input type="text" class="form-control" id="name" name="name" placeholder="Имя" value="" required>
     </div>
   </div>
+  
   <div class="form-group">
     <label for="phone" class="col-sm-2 control-label">Телефон *</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="phone" name="phone" placeholder="Телефон" value="{{ user.userprofile.phone }}" required>
+      <input type="text" class="form-control" id="phone" name="phone" placeholder="Телефон" value="" required>
     </div>
   </div>
 
