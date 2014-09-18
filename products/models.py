@@ -14,6 +14,11 @@ price_parsing_result = (
     ('process', 'В процессе'),
 )
 
+# sale = 20-70%
+# розница со скидкой = (розница - опт)*s + опт
+# прайс для оптовика: розница аксовская, опт - розница со скидкой
+# скидка рассчитывается когда розничная цена > 1500, и разница между розницей и оптом > 350
+
 MIN_PRICE = 1500
 MIN_DIFF = 300
 PRICE_PERCENT = 0.8
@@ -114,7 +119,6 @@ class Vendor(models.Model):
 
 class Product(models.Model) :
 
-    in_price_desc = models.CharField(max_length=255, verbose_name="Описание в прайсе")
     name = models.CharField(max_length=255, verbose_name="Название")
     vendor = models.ForeignKey(Vendor, verbose_name="Производитель", null=True, blank=True)
 
@@ -212,7 +216,6 @@ class Product(models.Model) :
 
     def store(self, entry) :
 
-        self.in_price_desc = entry.get("in_price_desc", "")
         self.vendor = entry.get("vendor", None)
 
         self.name = entry.get("name","")

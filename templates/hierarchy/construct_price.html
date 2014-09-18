@@ -1,0 +1,71 @@
+{% extends "base/base.html" %}
+
+{% block title %}
+Выгрузка прайса
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="post-header">
+        <h1 class="post-title">Выгрузка прайса</h1>
+
+      </div>
+
+      <div class="row">
+
+        <div class="col-sm-8 blog-main">
+            <form action="#" method="post" onsubmit="return false;">
+            <div class="blog-post">
+                <h3 class="post-title">Тип прайса</h3>
+                <p class="lead post-description">
+                Выбери тип прайса
+                </p>
+                <label><input type="radio" name="price_type" value="trade"/> Для опта</label>
+                <label><input type="radio" name="price_type" value="retail"/> Для розницы</label>
+
+            </div><!-- /.blog-post -->
+
+          <div class="blog-post">
+              <p class="lead post-description">
+              Отметь рубрики, товары которых должны попасть в прайс
+              </p>
+              {%include "hierarchy/rubric_roots.html" %}
+          </div><!-- /.blog-post -->
+
+
+      </form>
+        </div><!-- /.blog-main -->
+
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+
+            {% include "hierarchy/parts/construct_price_controls.html" %}
+            
+        </div><!-- /.blog-sidebar -->
+
+      </div><!-- /.row -->
+  </div>
+{% endblock %}
+
+{% block libs %}
+<script>
+$(document).ready(function(){
+    $("input[name=rubric]").change(function(){
+        var self = $(this);
+        var chs=self.parent().parent().find("ul:first").find("input[name=rubric]");
+        if (self.is(":checked")) {
+            chs.prop('checked', true);
+        }else{
+            chs.removeAttr("checked");
+        }
+    });
+
+    $(".set_checked").click(function(){
+        $("input[name=rubric]").prop('checked', true);
+    });
+
+    $(".set_unchecked").click(function(){
+        $("input[name=rubric]").removeAttr("checked");
+    });
+});
+</script>
+{% endblock %}

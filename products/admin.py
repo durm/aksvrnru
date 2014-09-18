@@ -55,7 +55,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'vendor', 'short_desc', 'trade_price', 'retail_price')
     list_filter = ('by_order', 'is_new', 'is_special_price', 'is_recommend_price', 'is_valid', 'is_published')
-    search_fields = ['name']
+    search_fields = ['name', 'vendor__name', 'short_desc', 'desc'] 
 
     fields = ['name', 'vendor', 'short_desc', 'desc', 'image', 'rubrics', 'trade_price', 'retail_price', 'retail_price_in_price', 'is_valid', 'is_published', 'is_recommend_price',
         'external_link', 'by_order', 'is_new', 'is_special_price',

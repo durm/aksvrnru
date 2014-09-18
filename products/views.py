@@ -9,9 +9,9 @@ from django.core.context_processors import csrf
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate, login
 
-def rubrics_hierarchy(request):
+def rubrics_hierarchy(request, choose=False, tpl='hierarchy/hierarchy.html'):
     rubrics = Rubric.objects.filter(parent__isnull=True)
-    return render_to_response('hierarchy/hierarchy.html', {"rubrics":rubrics}, get_context(request))
+    return render_to_response(tpl, {"rubrics":rubrics, "choose":choose}, get_context(request))
 
 def get_product(request, num):
     try:
@@ -19,6 +19,9 @@ def get_product(request, num):
         return render_product(request, product)
     except Product.DoesNotExist :
         return page_doesnot_exist(request, num)
-    
+
 def render_product(request, product):
     return render_to_response("products/product.html", {'product':product}, get_context(request))
+
+def get_rubrics_hierarchy_for_upload(request):
+    return rubrics_hierarchy(request, choose=True, tpl='hierarchy/construct_price.html')

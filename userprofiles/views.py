@@ -107,9 +107,9 @@ def bookcall(request):
 def send_bookcall(request):
 
     try:
-        name = request.POST.get("name")
+        name = request.POST.get("name", "")
         phone = request.POST.get("phone")
-        message = request.POST.get("message")
+        message = request.POST.get("message", "")
 
         title = u"AKSVRN | %s заказал звонок" % name
         message = u"Телефон: %s; %s" % (phone, message)
@@ -127,10 +127,10 @@ def feedback(request):
 def send_feedback(request):
 
     try:
-        name = request.POST.get("name")
+        name = request.POST.get("name", "")
         email = request.POST.get("email")
         subject = request.POST.get("subject")
-        message = request.POST.get("message")
+        message = request.POST.get("message", "")
 
         title = u"AKSVRN | %s отправил Вам сообщение (%s)" % (name, subject)
         message = u"Email: %s; %s" % (email, message)

@@ -12,6 +12,7 @@ import uuid
 import urllib
 import xlrd
 from multiprocessing.pool import ThreadPool
+from django.core.urlresolvers import reverse
 
 CHILD_RUBRIC_COLOR = 23
 PARENT_RUBRIC_COLOR = 63
@@ -53,6 +54,12 @@ def get_external_link(ws, row):
         return link.url_or_path
     else:
         return ""
+
+def update_external_link(ws, row, uri):
+    link = ws.hyperlink_map.get((row, 5))
+
+    if link is not None :
+        link.url_or_path = uri
 
 def is_empty(x):
     return x == ""
@@ -214,6 +221,8 @@ def store_product(rowValues, ws, row, user, current_rubric, wb):
     }
 
     product.store(product_entry)
+
+    update_external_link(ws, row, reverse('get_product', kwargs={'num':product.id}))
 
     update_product_with_external_desc.delay(product)
 
