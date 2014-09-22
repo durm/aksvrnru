@@ -97,7 +97,10 @@ class Rubric(models.Model):
         return len(Rubric.objects.filter(parent=self)[:1]) == 1
 
     def children(self):
-        return Rubric.objects.filter(parent=self, is_published=True)
+        return Rubric.objects.filter(parent=self)
+    
+    def get_published_children(self):
+        return self.children().filter(is_published=True)
 
     class Meta :
         verbose_name = "Рубрика"
