@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate, login
 import xlwt
 import StringIO, tempfile
 import uuid
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from datetime import datetime
 from aksvrnru import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -25,7 +25,16 @@ def listing(request):
     
     q_filter = request.GET.get("q", "")
     price_from_filter = request.GET.get("price_from", "")
+    try:
+        price_from_filter = float(price_from_filter.replace(",", "."))
+    except:
+        price_from_filter = ""
     price_to_filter = request.GET.get("price_to", "")
+    try:
+        price_to_filter = float(price_to_filter.replace(",", "."))
+    except:
+        price_to_filter = ""
+    available_filter = request.GET.get("a", "") == "1"
     
     products = Product.objects.filter(is_published=True)
     
@@ -34,7 +43,9 @@ def listing(request):
     if price_to_filter :
         products = products.filter(retail_price__lt=price_to_filter)    
     if q_filter :
-        products = products.filter(Q(short_desc__contains=q_filter)|Q(name__contains=q_filter)|Q(vendor__name__contains=q_filter))    
+        products = products.filter(Q(short_desc__contains=q_filter)|Q(name__contains=q_filter)|Q(vendor__name__contains=q_filter))   
+    if available_filter :
+        products = products.filter(available=available_filter)
     
     paginator = Paginator(products, 25)
     
@@ -45,8 +56,16 @@ def listing(request):
         products = paginator.page(1)
     except EmptyPage:
         products = paginator.page(paginator.num_pages)
-
-    return render_to_response('products/list.html', {"products": products})
+        
+    qparams = {'q_filter':q_filter, 'price_from_filter':price_from_filter, 'price_to_filter':price_to_filter, 'available_filter':available_filter}
+    
+    qd = QueryDict(request.GET.urlencode(), mutable=True)
+    try:
+        qd.pop('page')
+    except:
+        pass
+    
+    return render_to_response('products/list.html', {"products": products, "qparams":qparams, "qparams_str":qd.urlencode()})
 
 def get_product(request, num):
     try:

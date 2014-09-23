@@ -49,15 +49,17 @@
                 </div>
                 {% endfor %}
                 
+                {% if products.has_previous or products.has_next %}
                 <ul class="pager">
                     {% if products.has_previous %}
-                        <li class="pull-left"><a href="?page={{ products.previous_page_number }}">Предыдущие</a></li>
+                        <li class="pull-left"><a href="?page={{ products.previous_page_number }}&{{qparams_str}}">Предыдущие</a></li>
                     {% endif %}
                     <li>Страница {{ products.number }} из {{ products.paginator.num_pages }}</li>
                     {% if products.has_next %}
-                        <li class="pull-right"><a href="?page={{ products.next_page_number }}">next</a></li>
+                        <li class="pull-right"><a href="?page={{ products.next_page_number }}&{{qparams_str}}">next</a></li>
                     {% endif %}
                 </ul>
+                {% endif %}
             {% else %}
                 Ничего не найдено.
             {% endif %}
