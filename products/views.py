@@ -13,6 +13,7 @@ import StringIO, tempfile
 import uuid
 from django.http import HttpResponse
 from datetime import datetime
+from aksvrnru import settings
 
 def rubrics_hierarchy(request, choose=False, tpl='hierarchy/hierarchy.html', is_published=True):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True)
@@ -52,6 +53,9 @@ def construct_price(request):
     style_string = "borders: top medium, bottom medium, left medium, right medium"
     style = xlwt.easyxf(style_string)
 
+    product_style_string = "borders: bottom thin, left thin, right thin"
+    product_style = xlwt.easyxf(style_string)
+
     ws.write(0, 0, u"Прайс%sсгенерирован %s" % (price_desc, str(datetime.now())))
     ws.write(1, 0, u"Наименование товара", style)
     ws.write(1, 1, u"Цена", style)
@@ -62,7 +66,7 @@ def construct_price(request):
 
     r = 1
     for rubric in rubrics :
-        r = write_rubric(ws, r, rubric, get_root_rubric_style(), filt=rubrics_ids)
+        r = write_rubric(ws, r, rubric, get_root_rubric_style(), filt=rubrics_ids, product_style=product_style)
 
     f = StringIO.StringIO()
 
@@ -72,28 +76,27 @@ def construct_price(request):
     response['Content-Disposition'] = 'attachment; filename=price_%s.xls' % str(uuid.uuid4())
     return response
 
-def write_rubric(ws, r, rubric, style=xlwt.XFStyle(), filt=None):
+def write_rubric(ws, r, rubric, style=xlwt.XFStyle(), filt=None, product_style=None):
     r += 1
     ws.write(r, 0, rubric.name, style)
     ws.write(r, 1, "", style)
     ws.write(r, 2, "", style)
     for product in rubric.get_published_products() :
-        r = write_product(ws, r, product)
+        r = write_product(ws, r, product, style=product_style)
     childs = rubric.get_published_children()
     if filt is not None :
         childs = childs.filter(id__in=filt)
     for child in childs :
-        r = write_rubric(ws, r, child, get_rubric_stile(), filt=filt)
+        r = write_rubric(ws, r, child, get_rubric_stile(), filt=filt, product_style=product_style)
     return r
 
-def write_product(ws, r, product):
+def write_product(ws, r, product, style=None):
     r += 1
-    style_string = "borders: bottom thin, left thin, right thin"
-    style = xlwt.easyxf(style_string)
+
 
     ws.write(r, 0, "%s | %s | %s" % (product.vendor.name, product.name, product.short_desc), style)
     ws.write(r, 1, product.retail_price, style)
-    ws.write(r, 2, xlwt.Formula(u'HYPERLINK("http://localhost:8000%s";"На сайте...")' % reverse('get_product', kwargs={'num':product.id})), style)
+    ws.write(r, 2, xlwt.Formula(u'HYPERLINK("%s%s";"На сайте...")' % (settings.DOMAIN_, reverse('get_product', kwargs={'num':product.id}))), style)
     return r
 
 def get_rubric_stile(t="grey50"):

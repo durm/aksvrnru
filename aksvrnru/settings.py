@@ -29,6 +29,8 @@ TEMPLATE_DIRS = (
 
 ALLOWED_HOSTS = ['aks.djangohost.name']
 
+DOMAIN_ = "http://localhost:8000"
+
 
 # Application definition
 
