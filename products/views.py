@@ -37,62 +37,63 @@ def get_rubrics_hierarchy_for_upload(request):
 def construct_price(request):
     price_type = request.POST.get("price_type")
     rubrics_ids = request.POST.getlist("rubric")
-    
+
     if price_type is None or len(rubrics_ids) == 0 :
         return error(request, "Ошибка", "Не задан тип прайса или не выбраны рубрики")
 
 
     wb = xlwt.Workbook()
     ws = wb.add_sheet('Page1')
-    
+
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True, id__in=rubrics_ids)
-    
+
     price_desc = u" для розницы " if price_type == "retail" else u" для розницы опта "
-    
+
     style_string = "borders: top medium, bottom medium, left medium, right medium"
     style = xlwt.easyxf(style_string)
-    
+
     ws.write(0, 0, u"Прайс%sсгенерирован %s" % (price_desc, str(datetime.now())))
     ws.write(1, 0, u"Наименование товара", style)
     ws.write(1, 1, u"Цена", style)
     ws.write(1, 2, u"Ссылка", style)
-    
+
     col = ws.col(0)
     col.width = 1200 * 20
-    
+
     r = 1
     for rubric in rubrics :
-        r = write_rubric(ws, r, rubric, get_root_rubric_style())
-    
+        r = write_rubric(ws, r, rubric, get_root_rubric_style(), filt=rubrics_ids)
+
     f = StringIO.StringIO()
-    
+
     wb.save(f)
 
     response = HttpResponse(f.getvalue(), content_type="application/vnd.ms-excel")
     response['Content-Disposition'] = 'attachment; filename=price_%s.xls' % str(uuid.uuid4())
     return response
 
-def write_rubric(ws, r, rubric, style=xlwt.XFStyle()):
+def write_rubric(ws, r, rubric, style=xlwt.XFStyle(), filt=None):
     r += 1
     ws.write(r, 0, rubric.name, style)
     ws.write(r, 1, "", style)
     ws.write(r, 2, "", style)
-    products = Product.objects.filter(rubrics__in=[rubric], is_published=True)
-    for product in products :
+    for product in rubric.get_published_products() :
         r = write_product(ws, r, product)
-    childs = rubric.children()
+    childs = rubric.get_published_children()
+    if filt is not None :
+        childs = childs.filter(id__in=filt)
     for child in childs :
-        r = write_rubric(ws, r, child, get_rubric_stile())
+        r = write_rubric(ws, r, child, get_rubric_stile(), filt=filt)
     return r
-        
+
 def write_product(ws, r, product):
     r += 1
     style_string = "borders: bottom thin, left thin, right thin"
     style = xlwt.easyxf(style_string)
-    
+
     ws.write(r, 0, "%s | %s | %s" % (product.vendor.name, product.name, product.short_desc), style)
     ws.write(r, 1, product.retail_price, style)
-    ws.write(r, 2, u"На сайте...", style)
+    ws.write(r, 2, xlwt.Formula(u'HYPERLINK("http://localhost:8000%s";"На сайте...")' % reverse('get_product', kwargs={'num':product.id})), style)
     return r
 
 def get_rubric_stile(t="grey50"):
@@ -107,4 +108,3 @@ def get_rubric_stile(t="grey50"):
 
 def get_root_rubric_style():
     return get_rubric_stile(t="grey80")
-    

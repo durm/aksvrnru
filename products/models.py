@@ -98,9 +98,15 @@ class Rubric(models.Model):
 
     def children(self):
         return Rubric.objects.filter(parent=self)
-    
+
     def get_published_children(self):
         return self.children().filter(is_published=True)
+
+    def get_products(self):
+        return Product.objects.filter(rubrics__in=[self])
+
+    def get_published_products(self):
+        return self.get_products().filter(is_published=True)
 
     class Meta :
         verbose_name = "Рубрика"
