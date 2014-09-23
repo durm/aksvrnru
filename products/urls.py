@@ -9,5 +9,6 @@ urlpatterns = patterns('',
     url(r'^rubrics/construct_price/$', 'products.views.construct_price', name='construct_price'),
 
     url(r'^product(?P<num>[0-9]+)/$', 'products.views.get_product', name='get_product'),
+    url(r'^listing/$', 'products.views.listing', name='listing'),
 
 )

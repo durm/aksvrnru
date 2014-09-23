@@ -1,0 +1,71 @@
+{% extends "base/base.html" %}
+
+{% load markdown_deux_tags %}
+{% load staticfiles %}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-12 col-sm-9">
+            {% if products %}
+            <table class="table table-striped">
+              {% for product in products %}
+                  <tr>
+                      <td width="200">
+                          <a href="{% url 'get_product' product.id %}">
+                          <img src="{% static 'no-photo.png' %}"  data-src="holder.js/300x300" class="img-responsive" alt="Responsive image"/>
+                      </a>
+                      </td>
+                      <td>
+                          <a href="{% url 'get_product' product.id %}">{{ product.vendor.name }} {{ product.name }}</a>
+                          <p>{{ product.short_desc }}<p>
+                      </td>
+                      <td width="125px">
+                          {{ product.retail_price }}р
+                      </td>
+                  </tr>
+              {% endfor %}
+            </table>
+            {% else %}
+                Ничего не найдено.
+            {% endif %}
+
+            <div class="pagination">
+                <span class="step-links">
+                    {% if products.has_previous %}
+                        <a href="?page={{ products.previous_page_number }}">previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Страница {{ products.number }} из {{ products.paginator.num_pages }}.
+                    </span>
+
+                    {% if contacts.has_next %}
+                        <a href="?page={{ products.next_page_number }}">next</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-3">
+            {% include "pages/parts/search.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block libs %}
+<script>
+    $(document).ready(function(){
+        var max = -1;
+        $(".special_product").each(function() {
+            var h = $(this).height();
+            max = h > max ? h : max;
+        });
+        $(".special_product").height(max)
+    });
+</script>
+{% endblock %}

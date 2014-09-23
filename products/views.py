@@ -14,10 +14,25 @@ import uuid
 from django.http import HttpResponse
 from datetime import datetime
 from aksvrnru import settings
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def rubrics_hierarchy(request, choose=False, tpl='hierarchy/hierarchy.html', is_published=True):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True)
     return render_to_response(tpl, {"rubrics":rubrics, "choose":choose}, get_context(request))
+
+def listing(request):
+    products = Product.objects.filter(is_published=True)
+    paginator = Paginator(products, 25)
+    
+    page = request.GET.get('page')
+    try:
+        products = paginator.page(page)
+    except PageNotAnInteger:
+        products = paginator.page(1)
+    except EmptyPage:
+        products = paginator.page(paginator.num_pages)
+
+    return render_to_response('products/list.html', {"products": products})
 
 def get_product(request, num):
     try:

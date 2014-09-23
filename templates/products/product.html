@@ -1,13 +1,26 @@
 {% extends "base/base.html" %}
 
+{% load staticfiles %}
 {% load markdown_deux_tags %}
 
 {% block title %}
-{{product.name}}
+{{ product.vendor.name }} {{product.name}}
 {% endblock %}
 
 {% block content %}
-    <h1 class="post-title">{{product.name}}</h1>
+<div class="container">
+    <img src="{% static 'no-photo.png' %}"  data-src="holder.js/300x300" class="pull-left img-responsive" style="margin: 0px 20px 20px 0px;" alt="Responsive image"/>
+
+    <h1 class="post-title">{{ product.vendor.name }} {{product.name}}</h1>
+    {% if product.short_desc %}
+        <p>{{ product.short_desc }}</p>
+    {% endif %}
+    <div>{{ product.retail_price }}р</div>
+    <div class="clearfix"></div>
+    {% if product.desc %}
+        <div>{{ product.desc }}</div>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block head %}
