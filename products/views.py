@@ -15,13 +15,27 @@ from django.http import HttpResponse
 from datetime import datetime
 from aksvrnru import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 
 def rubrics_hierarchy(request, choose=False, tpl='hierarchy/hierarchy.html', is_published=True):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True)
     return render_to_response(tpl, {"rubrics":rubrics, "choose":choose}, get_context(request))
 
 def listing(request):
+    
+    q_filter = request.GET.get("q", "")
+    price_from_filter = request.GET.get("price_from", "")
+    price_to_filter = request.GET.get("price_to", "")
+    
     products = Product.objects.filter(is_published=True)
+    
+    if price_from_filter :
+        products = products.filter(retail_price__gt=price_from_filter)
+    if price_to_filter :
+        products = products.filter(retail_price__lt=price_to_filter)    
+    if q_filter :
+        products = products.filter(Q(short_desc__contains=q_filter)|Q(name__contains=q_filter)|Q(vendor__name__contains=q_filter))    
+    
     paginator = Paginator(products, 25)
     
     page = request.GET.get('page')
