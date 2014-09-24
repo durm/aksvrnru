@@ -47,6 +47,15 @@ def listing(request):
     if available_filter :
         products = products.filter(available=available_filter)
     
+    order_by = request.REQUEST.get("order_by", "")
+    direction = request.REQUEST.get("direction", "")
+    direction = "-" if direction == "-" else ""
+    if order_by in ["vendor__name", "id", "retail_price"] :
+        products = products.order_by(direction + order_by)
+    else:
+        order_by = None
+    
+    products_count = products.count()
     paginator = Paginator(products, 25)
     
     page = request.GET.get('page')
@@ -65,7 +74,12 @@ def listing(request):
     except:
         pass
     
-    return render_to_response('products/list.html', {"products": products, "qparams":qparams, "qparams_str":qd.urlencode()})
+    try:
+        qd.pop('order_by')
+    except:
+        pass
+    
+    return render_to_response('products/list.html', {"products": products, "direction":direction, "order_by": order_by, "qparams":qparams, "qparams_str":qd.urlencode(), "product_count":products_count}, get_context(request))
 
 def get_product(request, num):
     try:

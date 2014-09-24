@@ -16,6 +16,24 @@
     <div class="row row-offcanvas row-offcanvas-right">
         <div class="col-xs-12 col-sm-9">
             {% if products %}
+                <p>
+                    Найдено: <strong>{{product_count}}</strong>
+                    </p>
+                    <p>
+                    <form id="sort_form" action="?{{qparams_str}}" method="post" class="form-inline">
+                        {% csrf_token %}
+                        Сортировка&#160;&#160;
+                        <select name="order_by" onchange="$('#sort_form').submit()">
+                            <option {% if order_by == "id" %}selected="selected"{% endif %} value="id">по дате</option>
+                            <option {% if order_by == "retail_price" %}selected="selected"{% endif %} value="retail_price">по цене</option>
+                            <option {% if order_by == "vendor__name" %}selected="selected"{% endif %} value="vendor__name">по производителю</option>
+                        </select>
+                        <select name="direction" onchange="$('#sort_form').submit()">
+                            <option {% if direction == "" %}selected="selected"{% endif %} value="">По возврастанию</option>
+                            <option {% if direction == "-" %}selected="selected"{% endif %} value="-">По убыванию</option>
+                        </select>
+                    </form>
+                </p>
                 {% for product in products %}
                 <div class="media" style="position:relative; border-bottom: #ececec solid 1px;">
                     <a class="pull-left" href="{% url 'get_product' product.id %}">
@@ -52,11 +70,11 @@
                 {% if products.has_previous or products.has_next %}
                 <ul class="pager">
                     {% if products.has_previous %}
-                        <li class="pull-left"><a href="?page={{ products.previous_page_number }}&{{qparams_str}}">Предыдущие</a></li>
+                        <li class="pull-left"><a href="?page={{ products.previous_page_number }}{% if order_by %}&order_by={{order_by}}{% if direction == '-' %}&direction=-{% endif %}{% endif %}&{{qparams_str}}">Предыдущие</a></li>
                     {% endif %}
                     <li>Страница {{ products.number }} из {{ products.paginator.num_pages }}</li>
                     {% if products.has_next %}
-                        <li class="pull-right"><a href="?page={{ products.next_page_number }}&{{qparams_str}}">next</a></li>
+                        <li class="pull-right"><a href="?page={{ products.next_page_number }}{% if order_by %}&order_by={{order_by}}{% if direction == '-' %}&direction=-{% endif %}{% endif %}&{{qparams_str}}">next</a></li>
                     {% endif %}
                 </ul>
                 {% endif %}
