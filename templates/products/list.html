@@ -57,13 +57,12 @@
                         </h4>
                         <p>{{ product.short_desc }}<p>
                         <div style="position:absolute; bottom: 10px;">
-                            <a href="#" style="color: #5cb85c; text-transform: lowercase;">{{ product.vendor.name }}</a>;&#160;
+                            <a href="?vendor={{ product.vendor.id }}" style="color: #5cb85c; text-transform: lowercase;">{{ product.vendor.name }}</a>;&#160;
                             {% for r in product.rubrics.all %}
-                                <a href="#" style="color: #5cb85c; text-transform: lowercase;">{{ r.name }}</a>;&#160;
+                                <a href="?rubric={{ r.id }}" style="color: #5cb85c; text-transform: lowercase;">{{ r.name }}</a>;&#160;
                             {% endfor %}
                         </div>
                     </div>
-                    
                 </div>
                 {% endfor %}
                 

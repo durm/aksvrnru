@@ -1,4 +1,4 @@
-<form role="form" id="search_form" method="get" action="{% url 'listing' %}">
+<form role="form" id="search_form" class="well" method="get" action="{% url 'listing' %}">
 <legend>Поиск</legend>
   <div class="form-group">
     <input type="search" name="q" class="form-control" id="q" placeholder="Товар" {% if qparams.q_filter %}value="{{qparams.q_filter}}"{% endif %}>
@@ -20,7 +20,17 @@
     </label>
   </div>
 <br/>
+{% if vendors %}
+<div class="form-group">
+    <select name="vendor" multiple="multiple" class="form-control">
+    {% for vendor in vendors %}
+        <option value="{{ vendor.id }}" {% if vendor.id in qparams.vendor_filter %}selected="selected"{% endif %}>{{ vendor.name }}</option>
+    {% endfor %}
+    </select>
+</div>
+{% endif %}
   <button id="do_search" type="submit" class="btn btn-default">Отправить</button>
+  <input type="reset" class="btn btn-default" value="Очистить"/>
 </form>
 <script>
 $(document).ready(function(){

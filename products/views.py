@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 
 from django.shortcuts import redirect, render_to_response, render
-from products.models import Rubric, Product
+from products.models import Rubric, Product, Vendor
 from pages.views import get_context
 from django.contrib.auth import authenticate
 from aksvrnru.views import error, message
@@ -23,6 +23,8 @@ def rubrics_hierarchy(request, choose=False, tpl='hierarchy/hierarchy.html', is_
 
 def listing(request):
     
+    vendors = Vendor.objects.all()
+    
     q_filter = request.GET.get("q", "")
     price_from_filter = request.GET.get("price_from", "")
     try:
@@ -36,6 +38,9 @@ def listing(request):
         price_to_filter = ""
     available_filter = request.GET.get("a", "") == "1"
     
+    vendor_filter = request.GET.getlist("vendor", None)
+    rubric_filter = request.GET.getlist("rubric", None)
+    
     products = Product.objects.filter(is_published=True)
     
     if price_from_filter :
@@ -46,6 +51,10 @@ def listing(request):
         products = products.filter(Q(short_desc__contains=q_filter)|Q(name__contains=q_filter)|Q(vendor__name__contains=q_filter))   
     if available_filter :
         products = products.filter(available=available_filter)
+    if vendor_filter :
+        products = products.filter(vendor__in=vendor_filter)
+    if rubric_filter :
+        products = products.filter(rubrics__in=rubric_filter)
     
     order_by = request.REQUEST.get("order_by", "")
     direction = request.REQUEST.get("direction", "")
@@ -66,7 +75,7 @@ def listing(request):
     except EmptyPage:
         products = paginator.page(paginator.num_pages)
         
-    qparams = {'q_filter':q_filter, 'price_from_filter':price_from_filter, 'price_to_filter':price_to_filter, 'available_filter':available_filter}
+    qparams = {'q_filter':q_filter, 'vendor_filter': map(id_to_int, vendor_filter), 'price_from_filter':price_from_filter, 'price_to_filter':price_to_filter, 'available_filter':available_filter}
     
     qd = QueryDict(request.GET.urlencode(), mutable=True)
     try:
@@ -79,7 +88,23 @@ def listing(request):
     except:
         pass
     
-    return render_to_response('products/list.html', {"products": products, "direction":direction, "order_by": order_by, "qparams":qparams, "qparams_str":qd.urlencode(), "product_count":products_count}, get_context(request))
+    req = {
+        "products": products, 
+        "direction":direction, 
+        "order_by": order_by, 
+        "qparams":qparams, 
+        "qparams_str":qd.urlencode(), 
+        "product_count":products_count,
+        "vendors": vendors
+    }
+    
+    return render_to_response('products/list.html', req, get_context(request))
+
+def id_to_int(i):
+    try:
+        return int(i)
+    except:
+        return None
 
 def get_product(request, num):
     try:
