@@ -54,7 +54,15 @@ def listing(request):
     if vendor_filter :
         products = products.filter(vendor__in=vendor_filter)
     if rubric_filter :
-        products = products.filter(rubrics__in=rubric_filter)
+        
+        rubrics_id = []
+        rubrics_id += rubric_filter
+        
+        rubrics = Rubric.objects.filter(id__in=rubric_filter)
+        for rubric in rubrics :
+            get_children_ids(rubrics_id, rubric)
+        
+        products = products.filter(rubrics__in=rubrics_id)
     
     order_by = request.REQUEST.get("order_by", "")
     direction = request.REQUEST.get("direction", "")
@@ -99,6 +107,11 @@ def listing(request):
     }
     
     return render_to_response('products/list.html', req, get_context(request))
+
+def get_children_ids(l, rubric):
+    for c in rubric.children():
+        l.append(c.id)
+        get_children_ids(l, c)
 
 def id_to_int(i):
     try:
