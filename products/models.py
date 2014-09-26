@@ -14,6 +14,19 @@ price_parsing_result = (
     ('process', 'В процессе'),
 )
 
+sale_rate = (
+    (0, '0%'),
+    (0.1, '10%'),
+    (0.2, '20%'),
+    (0.3, '30%'),
+    (0.4, '40%'),
+    (0.5, '50%'),
+    (0.6, '60%'),
+    (0.7, '70%'),
+    (0.8, '80%'),
+    (0.9, '90%'),
+)
+
 # sale = 20-70%
 # розница со скидкой = (розница - опт)*s + опт
 # прайс для оптовика: розница аксовская, опт - розница со скидкой
@@ -169,6 +182,8 @@ class Product(models.Model) :
     is_published = models.BooleanField(default=False, verbose_name="Опубликован")
 
     available = models.BooleanField(default=False, verbose_name="В наличии")
+    
+    sale = models.FloatField(choices=sale_rate, blank=True, null=True, verbose_name="Скидка")
 
     def get_full_image_path(self):
         if self.image :
@@ -222,6 +237,9 @@ class Product(models.Model) :
             fpath = self.get_full_image_path()
             os.remove("%s200" % fpath)
             os.remove("%s500" % fpath)
+            
+    def same_rubric_products(self, c=6):
+        return Product.subset_by_rubrics(self.rubrics, c)
 
     def store(self, entry) :
 
@@ -268,6 +286,14 @@ class Product(models.Model) :
 
     def __unicode__(self):
         return "%s" % (self.name)
+    
+    @staticmethod
+    def subset_by_rubrics(r, c = 6):
+        return Product.objects.filter(is_published=True, rubrics__in=r.all()).order_by('?')[:c]
+    
+    @staticmethod
+    def subset_of_special_price(c = 6):
+        return Product.objects.filter(is_published=True, is_special_price=True).order_by('?')[:c]
 
     class Meta :
         verbose_name = "Продукт"

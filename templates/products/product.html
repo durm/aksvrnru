@@ -15,13 +15,45 @@
     {% if product.short_desc %}
         <p>{{ product.short_desc }}</p>
     {% endif %}
-    <div>{{ product.retail_price }}р</div>
+    {% if product.available %}
+        <div>Есть в наличии</div>
+        <div>{{ product.retail_price }}р</div>
+    {% else %}
+        <div>Нет в наличии</div>
+    {% endif %}
     <div class="clearfix"></div>
     {% if product.desc %}
         <div>{{ product.desc }}</div>
     {% endif %}
+    {% with same_rubric_products=product.same_rubric_products %}
+        {% if same_rubric_products %}
+            <div>
+            <h3>Торары из той же рубрики</h3>
+            <div class="row">
+            
+            {% for prd in same_rubric_products %}
+                {% include "pages/special_product_view.html" %}
+            {% endfor %}
+            </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+    
 </div>
 {% endblock %}
 
 {% block head %}
+{% endblock %}
+
+{% block libs %}
+<script>
+    $(document).ready(function(){
+        var max = -1;
+        $(".special_product").each(function() {
+            var h = $(this).height();
+            max = h > max ? h : max;
+        });
+        $(".special_product").height(max)
+    });
+</script>
 {% endblock %}

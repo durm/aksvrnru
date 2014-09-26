@@ -6,7 +6,7 @@ from pages.models import Page, PagesSettings
 from products.models import *
 
 def home(request):
-    special_price_products = Product.objects.filter(is_special_price=True).order_by('?')[:6]
+    special_price_products = Product.subset_of_special_price()
 
     req = {
         "special_price_products": special_price_products

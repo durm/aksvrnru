@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'kombu.transport.django',
     'djcelery',
     'userprofiles',
+    #'south',
 )
 
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'

@@ -122,6 +122,7 @@ def id_to_int(i):
 def get_product(request, num):
     try:
         product = Product.objects.get(id=num)
+        
         return render_product(request, product)
     except Product.DoesNotExist :
         return page_doesnot_exist(request, num)
