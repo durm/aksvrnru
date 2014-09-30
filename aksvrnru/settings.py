@@ -29,7 +29,7 @@ TEMPLATE_DIRS = (
 
 ALLOWED_HOSTS = ['aks.djangohost.name']
 
-DOMAIN_ = "http://aks.djangohost.name:8000"
+DOMAIN_ = "http://aks.djangohost.name"
 
 
 # Application definition
