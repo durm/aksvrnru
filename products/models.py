@@ -247,12 +247,16 @@ class Product(models.Model) :
     def trade_price_with_sale(self, s=None):
         if s is None :
             s = self.sale
-        return self.price_with_sale(self.trade_price, s if self.sale else 0)
+        else:
+            s = float(s)
+        return self.price_with_sale(self.trade_price, s)
     
     def retail_price_with_sale(self, s=None):
         if s is None :
             s = self.sale
-        return self.price_with_sale(self.retail_price, s if self.sale else 0)
+        else:
+            s = float(s)
+        return self.price_with_sale(self.retail_price, s)
 
     def store(self, entry) :
 

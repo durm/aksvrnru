@@ -139,12 +139,14 @@ def get_rubrics_hierarchy_for_upload(request):
 def construct_price(request):
     price_type = request.POST.get("price_type", "retail")
     sale = request.POST.get("sale", None)
+    
+    if sale is not None :
+        sale = float(sale.replace(",","."))
+        
     rubrics_ids = request.POST.getlist("rubric")
 
     if price_type is None or len(rubrics_ids) == 0 :
         return error(request, "Ошибка", "Не задан тип прайса или не выбраны рубрики")
-
-    sale = float(sale)
 
     wb = xlwt.Workbook()
     ws = wb.add_sheet('Page1')
@@ -200,7 +202,7 @@ def get_product_price_by_type_with_sale(product, price_type, sale=None):
         return product.retail_price
     if not product.available :
         return u"--"
-    if sale if None :
+    if sale is None :
         return product.retail_price_with_sale()
     else:
         return product.retail_price_with_sale(s=sale)
