@@ -240,6 +240,19 @@ class Product(models.Model) :
             
     def same_rubric_products(self, c=6):
         return Product.subset_by_rubrics(self.rubrics, c)
+    
+    def price_with_sale(self, pr, sl):
+        return pr - (pr * sl)
+    
+    def trade_price_with_sale(self, s=None):
+        if s is None :
+            s = self.sale
+        return self.price_with_sale(self.trade_price, s if self.sale else 0)
+    
+    def retail_price_with_sale(self, s=None):
+        if s is None :
+            s = self.sale
+        return self.price_with_sale(self.retail_price, s if self.sale else 0)
 
     def store(self, entry) :
 

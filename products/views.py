@@ -138,7 +138,7 @@ def get_rubrics_hierarchy_for_upload(request):
 
 def construct_price(request):
     price_type = request.POST.get("price_type", "retail")
-    sale = request.POST.get("sale", 0)
+    sale = request.POST.get("sale", None)
     rubrics_ids = request.POST.getlist("rubric")
 
     if price_type is None or len(rubrics_ids) == 0 :
@@ -169,7 +169,7 @@ def construct_price(request):
 
     r = 1
     for rubric in rubrics :
-        r = write_rubric(ws, r, rubric, get_root_rubric_style(), filt=rubrics_ids, product_style=product_style, sale=sale)
+        r = write_rubric(ws, r, rubric, get_root_rubric_style(), filt=rubrics_ids, product_style=product_style, sale=sale, price_type=price_type)
 
     f = StringIO.StringIO()
 
@@ -179,24 +179,39 @@ def construct_price(request):
     response['Content-Disposition'] = 'attachment; filename=price_%s.xls' % str(uuid.uuid4())
     return response
 
-def write_rubric(ws, r, rubric, style=xlwt.XFStyle(), filt=None, product_style=None, sale=0):
+def write_rubric(ws, r, rubric, style=xlwt.XFStyle(), filt=None, product_style=None, sale=None, price_type="retail"):
     r += 1
     ws.write(r, 0, rubric.name, style)
     ws.write(r, 1, "", style)
     ws.write(r, 2, "", style)
     for product in rubric.get_published_products() :
-        r = write_product(ws, r, product, style=product_style, sale=sale)
+        r = write_product(ws, r, product, style=product_style, sale=sale, price_type=price_type)
     childs = rubric.get_published_children()
     if filt is not None :
         childs = childs.filter(id__in=filt)
     for child in childs :
-        r = write_rubric(ws, r, child, get_rubric_stile(), filt=filt, product_style=product_style, sale=sale)
+        r = write_rubric(ws, r, child, get_rubric_stile(), filt=filt, product_style=product_style, sale=sale, price_type=price_type)
     return r
 
-def write_product(ws, r, product, style=None, sale=0):
+def get_product_price_by_type_with_sale(product, price_type, sale=None):
+    if product.by_order :
+        return u"Под заказ"
+    if product.is_recommend_price :
+        return product.retail_price
+    if not product.available :
+        return u"--"
+    if sale if None :
+        return product.retail_price_with_sale()
+    else:
+        return product.retail_price_with_sale(s=sale)
+    
+def write_product(ws, r, product, style=None, sale=None, price_type="retail"):
     r += 1
     ws.write(r, 0, "%s | %s | %s" % (product.vendor.name, product.name, product.short_desc), style)
-    ws.write(r, 1, product.retail_price - product.retail_price * sale, style)
+    
+    price = get_product_price_by_type_with_sale(product, price_type, sale)
+    
+    ws.write(r, 1, price, style)
     ws.write(r, 2, xlwt.Formula(u'HYPERLINK("%s%s";"На сайте...")' % (settings.DOMAIN_, reverse('get_product', kwargs={'num':product.id}))), style)
     return r
 
