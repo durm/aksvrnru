@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 
 from django.shortcuts import redirect, render_to_response, render
-from products.models import Rubric, Product, Vendor
+from products.models import Rubric, Product, Vendor, sale_rate
 from pages.views import get_context
 from django.contrib.auth import authenticate
 from aksvrnru.views import error, message
@@ -19,7 +19,7 @@ from django.db.models import Q
 
 def rubrics_hierarchy(request, choose=False, tpl='hierarchy/hierarchy.html', is_published=True):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True)
-    return render_to_response(tpl, {"rubrics":rubrics, "choose":choose}, get_context(request))
+    return render_to_response(tpl, {"rubrics":rubrics, "choose":choose, "sale_rate": sale_rate}, get_context(request))
 
 def listing(request):
     
@@ -133,16 +133,18 @@ def render_product(request, product):
 def get_rubrics_hierarchy_for_upload(request):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True).count()
     if rubrics == 0 :
-        return error(request, "Ошибка", "Нет активны рубрик! Нельзя сгенерировать прайс!")
+        return message(request, "Нет активных рубрик!", "Нельзя сгенерировать прайс!")
     return rubrics_hierarchy(request, choose=True, tpl='hierarchy/construct_price.html')
 
 def construct_price(request):
-    price_type = request.POST.get("price_type")
+    price_type = request.POST.get("price_type", "retail")
+    sale = request.POST.get("sale", 0)
     rubrics_ids = request.POST.getlist("rubric")
 
     if price_type is None or len(rubrics_ids) == 0 :
         return error(request, "Ошибка", "Не задан тип прайса или не выбраны рубрики")
 
+    sale = float(sale)
 
     wb = xlwt.Workbook()
     ws = wb.add_sheet('Page1')
@@ -167,7 +169,7 @@ def construct_price(request):
 
     r = 1
     for rubric in rubrics :
-        r = write_rubric(ws, r, rubric, get_root_rubric_style(), filt=rubrics_ids, product_style=product_style)
+        r = write_rubric(ws, r, rubric, get_root_rubric_style(), filt=rubrics_ids, product_style=product_style, sale=sale)
 
     f = StringIO.StringIO()
 
@@ -177,24 +179,22 @@ def construct_price(request):
     response['Content-Disposition'] = 'attachment; filename=price_%s.xls' % str(uuid.uuid4())
     return response
 
-def write_rubric(ws, r, rubric, style=xlwt.XFStyle(), filt=None, product_style=None):
+def write_rubric(ws, r, rubric, style=xlwt.XFStyle(), filt=None, product_style=None, sale=0):
     r += 1
     ws.write(r, 0, rubric.name, style)
     ws.write(r, 1, "", style)
     ws.write(r, 2, "", style)
     for product in rubric.get_published_products() :
-        r = write_product(ws, r, product, style=product_style)
+        r = write_product(ws, r, product, style=product_style, sale=sale)
     childs = rubric.get_published_children()
     if filt is not None :
         childs = childs.filter(id__in=filt)
     for child in childs :
-        r = write_rubric(ws, r, child, get_rubric_stile(), filt=filt, product_style=product_style)
+        r = write_rubric(ws, r, child, get_rubric_stile(), filt=filt, product_style=product_style, sale=sale)
     return r
 
-def write_product(ws, r, product, style=None):
+def write_product(ws, r, product, style=None, sale=0):
     r += 1
-
-
     ws.write(r, 0, "%s | %s | %s" % (product.vendor.name, product.name, product.short_desc), style)
     ws.write(r, 1, product.retail_price, style)
     ws.write(r, 2, xlwt.Formula(u'HYPERLINK("%s%s";"На сайте...")' % (settings.DOMAIN_, reverse('get_product', kwargs={'num':product.id}))), style)

@@ -1,4 +1,4 @@
-<li>
+<li {% if choose %}class="list-unstyled"{% endif %}>
     {% if choose %}
         <label for="rubric_{{ rubric.id }}">
             <input type="checkbox" checked="checked" id="rubric_{{ rubric.id }}" name="rubric" value="{{rubric.id}}"/>
