@@ -196,7 +196,7 @@ def write_rubric(ws, r, rubric, style=xlwt.XFStyle(), filt=None, product_style=N
 def write_product(ws, r, product, style=None, sale=0):
     r += 1
     ws.write(r, 0, "%s | %s | %s" % (product.vendor.name, product.name, product.short_desc), style)
-    ws.write(r, 1, product.retail_price, style)
+    ws.write(r, 1, product.retail_price - product.retail_price * sale, style)
     ws.write(r, 2, xlwt.Formula(u'HYPERLINK("%s%s";"На сайте...")' % (settings.DOMAIN_, reverse('get_product', kwargs={'num':product.id}))), style)
     return r
 
