@@ -11,8 +11,8 @@ def not_set(obj, attrib):
 
 def proc_list(modeladmin, request, queryset):
     for obj in queryset :
-        threading.Thread(target=proc, args=(request, obj)).start()
-        #proc.delay(request, obj)
+        #threading.Thread(target=proc, args=(request.user.id, obj.id)).start()
+        proc.delay(request.user.id, obj.id)
 
 proc_list.short_description = "Распарсить выделенные прайсы"
 

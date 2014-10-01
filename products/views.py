@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 
 from django.shortcuts import redirect, render_to_response, render
-from products.models import Rubric, Product, Vendor, sale_rate
+from products.models import Rubric, Price, Product, Vendor, sale_rate
 from pages.views import get_context
 from django.contrib.auth import authenticate
 from aksvrnru.views import error, message
@@ -16,10 +16,32 @@ from datetime import datetime
 from aksvrnru import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from products.tasks import proc
 
 def rubrics_hierarchy(request, choose=False, tpl='hierarchy/hierarchy.html', is_published=True):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True)
-    return render_to_response(tpl, {"rubrics":rubrics, "choose":choose, "sale_rate": sale_rate}, get_context(request))
+    if rubrics.count() :
+        return render_to_response(tpl, {"rubrics":rubrics, "choose":choose, "sale_rate": sale_rate}, get_context(request))
+    else:
+        return message(request, u"Нет активных рубрик!", u"")
+
+def upload_price(request):
+    if request.user.is_authenticated() and request.user.is_staff :
+        return render_to_response("products/upload_price.html", {}, get_context(request))
+    else:
+        return error(request, u"Ошибка доступа", u"Только персонал может загрузить и распарсить прайс!")
+
+def do_upload_price(request):
+    if request.user.is_authenticated() and request.user.is_staff :
+        f = request.FILES['price']
+        price = Price.objects.create(name=f.name, file=f)
+        price.save()
+        
+        proc.delay(request.user.id, price.id)
+        
+        return message(request, u"В обработке!", u"Прайс парсится")
+    else:
+        return error(request, u"Ошибка доступа", u"Только персонал может загрузить и распарсить прайс!")
 
 def listing(request):
     
@@ -31,6 +53,7 @@ def listing(request):
         price_from_filter = float(price_from_filter.replace(",", "."))
     except:
         price_from_filter = ""
+        
     price_to_filter = request.GET.get("price_to", "")
     try:
         price_to_filter = float(price_to_filter.replace(",", "."))
@@ -137,6 +160,7 @@ def get_rubrics_hierarchy_for_upload(request):
     return rubrics_hierarchy(request, choose=True, tpl='hierarchy/construct_price.html')
 
 def construct_price(request):
+    
     price_type = request.POST.get("price_type", "retail")
     sale = request.POST.get("sale", None)
     

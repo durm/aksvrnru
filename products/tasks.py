@@ -13,6 +13,8 @@ import urllib
 import xlrd
 from multiprocessing.pool import ThreadPool
 from django.core.urlresolvers import reverse
+from products.models import Price
+from django.contrib.auth.models import User
 
 CHILD_RUBRIC_COLOR = 23
 PARENT_RUBRIC_COLOR = 63
@@ -228,8 +230,11 @@ def store_product(rowValues, ws, row, user, current_rubric, wb):
 
 @shared_task
 def proc(request, obj):
-
-    #if obj.processed() or obj.processing() : return
+    
+    user = User.objects.get(id=user)
+    obj = Price.objects.get(id=obj)
+    
+    if obj.processed() or obj.processing() : return
 
     Product.objects.all().update(available = False)
 

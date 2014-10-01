@@ -1,38 +1,15 @@
 #-*- coding: utf-8 -*-
 
-"""
-Django settings for aksvrnru project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/1.6/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.6/ref/settings/
-"""
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
+import os, sys
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '=18m%uc2k%c$0=f_#k^2vjm@se9e%lo9i=d@!a^v_n^qdkyj6o'
 
 TEMPLATE_DEBUG = True
 
-TEMPLATE_DIRS = (
-    BASE_DIR + '/templates/'
-)
-
 ALLOWED_HOSTS = ['aks.djangohost.name']
 
 DOMAIN_ = "http://aks.djangohost.name/"
-
-
-# Application definition
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -67,25 +44,14 @@ ROOT_URLCONF = 'aksvrnru.urls'
 
 WSGI_APPLICATION = 'aksvrnru.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/1.6/ref/settings/#databases
-
-
 MEDIA_URL = "/media/"
 
-if os.path.exists(os.path.expanduser("~/aks_db.conf")):
-    MEDIA_ROOT = os.path.expanduser("~/media/aksvrnru")
-    dbconf = open(os.path.expanduser("~/aks_db.conf"), "r")
-    DEBUG = True
-else:
-    MEDIA_ROOT = os.path.expanduser("/home/aksdjang/media/aksvrnru")
-    dbconf = open(os.path.expanduser("/home/aksdjang/aks_db.conf"), "r")
-    DEBUG = False
+sys.path.append("..")
+import aksconf
 
-
-default_engine = eval(dbconf.read().strip())
-dbconf.close()
+MEDIA_ROOT = aksconf.MEDIA_ROOT
+DEBUG = aksconf.DEBUG
+default_engine = aksconf.default_engine
 
 STATIC_ROOT = "stats"
 WATER_MARK = os.path.join(STATIC_ROOT, "watermark.png")
@@ -96,9 +62,6 @@ DATABASES = {
 
 THREADED = False
 
-# Internationalization
-# https://docs.djangoproject.com/en/1.6/topics/i18n/
-
 LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'Europe/Moscow'
@@ -108,9 +71,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
 
@@ -137,3 +97,7 @@ EMAIL_USE_TLS = True
 #NOTES_EMAIL = 'aksesavto@yandex.ru'
 NOTES_EMAIL_FROM = 'durm.icecoffee@gmail.com'
 NOTES_EMAIL_TO = 'durm.icecoffee@gmail.com'
+
+TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR,  'templates'),
+)
