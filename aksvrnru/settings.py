@@ -46,7 +46,11 @@ WSGI_APPLICATION = 'aksvrnru.wsgi.application'
 
 MEDIA_URL = "/media/"
 
-sys.path.append("..")
+if os.path.exists("/home/aksdjang") :
+    sys.path.append("/home/aksdjang")
+else:
+    sys.path.append("..")
+    
 import aksconf
 
 MEDIA_ROOT = aksconf.MEDIA_ROOT
