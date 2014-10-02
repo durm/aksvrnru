@@ -39,7 +39,7 @@ def do_upload_price(request):
         
         proc.delay(request.user.id, price.id)
         
-        return message(request, u"В обработке!", u"Прайс парсится")
+        return message(request, u"В обработке!", u"Обработка прайса ожидает своей очереди!")
     else:
         return error(request, u"Ошибка доступа", u"Только персонал может загрузить и распарсить прайс!")
 

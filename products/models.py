@@ -41,7 +41,7 @@ class Price(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название")
     desc = models.TextField(blank=True, verbose_name="Описание")
 
-    file = models.FileField(upload_to=u'prices', verbose_name="Файл")
+    file = models.FileField(upload_to=u'prices/%s', verbose_name="Файл")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     created_by = models.ForeignKey(User, related_name='+cr+', blank=True, null=True, verbose_name="Создал")
@@ -84,10 +84,10 @@ class Price(models.Model):
 
     def __unicode__(self):
         name = self.name if self.name else self.file.name
-        return "%s" % (name)
+        return u"%s" % (name)
 
     class Meta :
-        verbose_name = "Прайс"
+        verbose_name = u"Прайс"
 
 class Rubric(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название")
