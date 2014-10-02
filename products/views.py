@@ -34,7 +34,7 @@ def upload_price(request):
 def do_upload_price(request):
     if request.user.is_authenticated() and request.user.is_staff :
         f = request.FILES['price']
-        price = Price.objects.create(name=f.name, file=f)
+        price = Price.objects.create(name=f.name.encode("utf-8"), file=f)
         price.save()
         
         proc.delay(request.user.id, price.id)
