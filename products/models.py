@@ -7,6 +7,7 @@ from django.dispatch.dispatcher import receiver
 import os
 from aksvrnru.utils import *
 from aksvrnru import settings
+from pytils.translit import translify, slugify
 
 price_parsing_result = (
     ('success', 'Успешно'),
@@ -36,12 +37,18 @@ MIN_PRICE = 1500
 MIN_DIFF = 300
 PRICE_PERCENT = 0.8
 
+def file_upload_path(instance, filename):
+    """Generates upload path for FileField"""
+    parts = filename.rsplit('.', 1)
+    str = "%s.%s" % (slugify(translify(parts[0])), slugify(translify(parts[1])))
+    return u"prices/%s" % (str)
+
 class Price(models.Model):
 
     name = models.CharField(max_length=255, verbose_name="Название")
     desc = models.TextField(blank=True, verbose_name="Описание")
 
-    file = models.FileField(upload_to=u'prices/%s', verbose_name="Файл")
+    file = models.FileField(upload_to=file_upload_path, verbose_name="Файл")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     created_by = models.ForeignKey(User, related_name='+cr+', blank=True, null=True, verbose_name="Создал")
