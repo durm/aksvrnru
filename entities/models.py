@@ -2,18 +2,16 @@
 
 from django.db import models
 import uuid
-
-def file_upload_path(instance, filename):
-    return u"entities/%s" % str(instance.id)
+from django.db.models.signals import pre_delete, pre_save
+from django.dispatch.dispatcher import receiver
+from django.contrib.auth.models import User
 
 class Entity(models.Model):
 
-    uuid = models.CharField(max_length=128, verbose_name=u"UUID")
-
-    name = models.CharField(max_length=255, verbose_name=u"Название")
+    name = models.CharField(max_length=255, blank=True, null=True, verbose_name=u"Название")
     desc = models.TextField(blank=True, null=True, verbose_name=u"Описание")
 
-    file = models.FileField(upload_to=file_upload_path, verbose_name=u"Файл")
+    file = models.FileField(upload_to=u"entities", null=False, verbose_name=u"Файл")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=u"Дата создания")
     created_by = models.ForeignKey(User, related_name='+cr+', blank=True, null=True, verbose_name=u"Создал")
@@ -27,3 +25,8 @@ class Entity(models.Model):
 
     class Meta :
         verbose_name = u"Файлы"
+
+@receiver(pre_delete, sender=Entity)
+def _entity_delete_pre(sender, instance, **kwargs):
+    instance.file.delete(False)
+

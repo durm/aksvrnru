@@ -8,6 +8,7 @@ import os
 from aksvrnru.utils import *
 from aksvrnru import settings
 from pytils.translit import translify, slugify
+from entities.models import Entity
 
 price_parsing_result = (
     ('success', 'Успешно'),
@@ -154,7 +155,7 @@ class Product(models.Model) :
     short_desc = models.TextField(blank=True, null=True, verbose_name="Краткое описание")
     desc = models.TextField(blank=True, null=True, verbose_name="Полное описание")
 
-    image = models.ImageField(upload_to=u'products', verbose_name="Изображение", null=True, blank=True)
+    images = models.ManyToManyField(Entity, blank=True, null=True, verbose_name="Картинки")
 
     trade_price = models.FloatField(default=0, verbose_name="Оптовая цена")
 
