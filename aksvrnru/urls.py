@@ -8,10 +8,10 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    url(r'^$', 'pages.views.home', name='home'),
-    url(r'^products/', include('products.urls')),
-    url(r'^pages/', include('pages.urls')),
-    url(r'^userprofiles/', include('userprofiles.urls')),
+    #url(r'^$', 'pages.views.home', name='home'),
+    #url(r'^products/', include('products.urls')),
+    #url(r'^pages/', include('pages.urls')),
+    #url(r'^userprofiles/', include('userprofiles.urls')),
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),

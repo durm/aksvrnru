@@ -2,25 +2,34 @@
 
 from django.db import models
 from datetime import date
+from utils.models import Proto
 
-class Page(models.Model):
-    title = models.CharField(max_length=255, verbose_name="Краткое название")
-    name = models.TextField(verbose_name="Полное название")
-    desc = models.TextField(blank=True, null=True, verbose_name="Описание")
-    content = models.TextField(verbose_name="Содержание")
-    parent = models.ForeignKey('self', blank=True, null=True, verbose_name="Родительская страница")
+class Page(Proto):
+    
+    title = models.CharField(
+        max_length=255, 
+        verbose_name=u"Краткое название"
+    )
 
-    def __unicode__(self):
-        return self.name
+    content = models.TextField(
+        verbose_name=u"Содержание"
+    )
+
+    parent = models.ForeignKey(
+        "self", 
+        blank=True, 
+        null=True, 
+        verbose_name=u"Родительская страница"
+    )
 
     def has_children(self):
-        return len(Page.objects.filter(parent=self)[:1]) == 1
+        return len(Page.objects.filter(parent=self)[:1]) == 1 #lazy
 
     def children(self):
         return Page.objects.filter(parent=self)
 
     class Meta :
-        verbose_name = "Страницы"
+        verbose_name = u"Страницы"
 
 class AbstractSettings(models.Model):
     class Meta:
@@ -38,14 +47,48 @@ class AbstractSettings(models.Model):
             return cls()
 
 class PagesSettings(AbstractSettings):
-    site_name = models.CharField(max_length=255, verbose_name="Название сайта")
-    copyright = models.CharField(max_length=255, verbose_name="Копирайт", null=True, blank=True)
 
-    top_menu = models.ManyToManyField(Page, null=True, blank=True, verbose_name="Верхнее меню", related_name="+tm")
-    bottom_menu = models.ManyToManyField(Page, null=True, blank=True, verbose_name="Нижнее меню", related_name="+bm")
+    site_name = models.CharField(
+        max_length=255, 
+        verbose_name=u"Название сайта"
+    )
+
+    copyright = models.CharField(
+        max_length=255, 
+        verbose_name=u"Копирайт", 
+        null=True, 
+        blank=True
+    )
+
+    top_menu = models.ManyToManyField(
+        Page, 
+        null=True, 
+        blank=True, 
+        verbose_name=u"Верхнее меню", 
+        related_name="+tm"
+    )
     
-    jumbotron_h = models.CharField(max_length=128, verbose_name="Джамб-название")
-    jumbotron_p = models.CharField(max_length=255, verbose_name="Джамб-предложение")
+    bottom_menu = models.ManyToManyField(
+        Page, 
+        null=True, 
+        blank=True, 
+        verbose_name=u"Нижнее меню", 
+        related_name="+bm"
+    )
+    
+    jumbotron_h = models.CharField(
+        max_length=128,
+        null=True,
+        blank=True, 
+        verbose_name=u"Джамб-название"
+    )
+    
+    jumbotron_p = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True, 
+        verbose_name=u"Джамб-предложение"
+    )
     
     def get_default_copyright(self):
         return "%s (c) %s" % (str(date.today().year), str("Copyright"))
@@ -54,4 +97,4 @@ class PagesSettings(AbstractSettings):
         return u"Настройки"
     
     class Meta :
-        verbose_name = "Настройки"
+        verbose_name = u"Настройки"

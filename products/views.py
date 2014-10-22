@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+"""
 from django.shortcuts import redirect, render_to_response, render
 from products.models import Rubric, Price, Product, Vendor, sale_rate
 from pages.views import get_context
@@ -253,3 +254,4 @@ def get_rubric_stile(t="grey50"):
 
 def get_root_rubric_style():
     return get_rubric_stile(t="grey80")
+"""

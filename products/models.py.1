@@ -1,10 +1,22 @@
 #-*- coding: utf-8 -*-
 
 from django.db import models
-from utils.models import Proto
-from vendors.models import Vendor
+from django.contrib.auth.models import User
+from django.db.models.signals import pre_delete, post_save
+from django.dispatch.dispatcher import receiver
+import os
+from aksvrnru.utils import *
+from aksvrnru import settings
+from pytils.translit import translify, slugify
 from entities.models import Entity
+from vendors.models import Vendor
 from rubrics.models import Rubric
+
+price_parsing_result = (
+    ('success', 'Успешно'),
+    ('error', 'Ошибка'),
+    ('process', 'В процессе'),
+)
 
 sale_rate = (
     (0, '0%'),
@@ -19,115 +31,68 @@ sale_rate = (
     (0.9, '90%'),
 )
 
-class Product(Proto) :
+# sale = 20-70%
+# розница со скидкой = (розница - опт)*s + опт
+# прайс для оптовика: розница аксовская, опт - розница со скидкой
+# скидка рассчитывается когда розничная цена > 1500, и разница между розницей и оптом > 350
 
-    vendor = models.ForeignKey(
-        Vendor, 
-        verbose_name=u"Производитель", 
-        null=True, 
-        blank=True
-    )
+MIN_PRICE = 1500
+MIN_DIFF = 300
+PRICE_PERCENT = 0.8
 
-    short_desc = models.TextField(
-        blank=True, 
-        null=True, 
-        verbose_name=u"Краткое описание"
-    )
+def file_upload_path(instance, filename):
+    """Generates upload path for FileField"""
+    parts = filename.rsplit('.', 1)
+    str = "%s.%s" % (slugify(translify(parts[0])), slugify(translify(parts[1])))
+    return u"prices/%s" % (str)
 
-    entities = models.ManyToManyField(
-        Entity, 
-        blank=True, 
-        null=True, 
-        verbose_name=u"Картинки"
-    )
 
-    trade_price = models.FloatField(
-        default=0, 
-        verbose_name=u"Оптовая цена"
-    )
+class Product(models.Model) :
 
-    retail_price = models.FloatField(
-        default=0, 
-        verbose_name=u"Розничная цена"
-    )
+    name = models.CharField(max_length=255, verbose_name="Название")
+    vendor = models.ForeignKey(Vendor, verbose_name="Производитель", null=True, blank=True)
 
-    """
-    retail_price_in_price = models.FloatField(
-        default=0, 
-        verbose_name=u"Розничная цена"
-    )
+    short_desc = models.TextField(blank=True, null=True, verbose_name="Краткое описание")
+    desc = models.TextField(blank=True, null=True, verbose_name="Полное описание")
 
-    retail_price_prev = models.FloatField(
-        default=0, 
-        verbose_name=u"Прежняя розн. цена"
-    )
-    """
+    images = models.ManyToManyField(Entity, blank=True, null=True, verbose_name="Картинки")
 
-    specify_trade_price = models.BooleanField(
-        default=False, 
-        verbose_name=u"Уточните опт. цену"
-    )
+    trade_price = models.FloatField(default=0, verbose_name="Оптовая цена")
 
-    specify_retail_price = models.BooleanField(
-        default=False, 
-        verbose_name=u"Уточните розн. цену"
-    )
+    retail_price = models.FloatField(default=0, verbose_name="Розничная цена")
+    retail_price_in_price = models.FloatField(default=0, verbose_name="Розничная цена")
+    retail_price_prev = models.FloatField(default=0, verbose_name="Прежняя розн. цена")
 
-    is_recommend_price = models.BooleanField(
-        default=False, 
-        verbose_name=u"Рекомендованная цена"
-    )
+    specify_trade_price = models.BooleanField(default=False, verbose_name="Уточните опт. цену")
+    specify_retail_price = models.BooleanField(default=False, verbose_name="Уточните розн. цену")
 
-    amount = models.IntegerField(
-        default=0, 
-        verbose_name=u"Количество"
-    )
+    is_recommend_price = models.BooleanField(default=False, verbose_name="Рекомендованная цена")
 
-    external_link = models.URLField(
-        blank=True, 
-        null=True, 
-        verbose_name=u"Внешняя ссылка"
-    )
+    amount = models.IntegerField(default=0, verbose_name="Количество")
 
-    by_order = models.BooleanField(
-        default=False, 
-        verbose_name=u"Под заказ"
-    )
+    external_link = models.URLField(blank=True, null=True, verbose_name="Внешняя ссылка")
 
-    is_new = models.BooleanField(
-        default=False, 
-        verbose_name=u"Новое поступление"
-    )
+    by_order = models.BooleanField(default=False, verbose_name="Под заказ")
 
-    is_special_price = models.BooleanField(
-        default=False, 
-        verbose_name=u"Спец. цена"
-    )
+    is_new = models.BooleanField(default=False, verbose_name="Новое поступление")
+    is_special_price = models.BooleanField(default=False, verbose_name="Спец. цена")
 
-    rubrics = models.ManyToManyField(
-        Rubric, 
-        blank=True, 
-        null=True, 
-        verbose_name=u"Рубрики"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    created_by = models.ForeignKey(User, related_name='+cr+', blank=True, null=True, verbose_name="Создал")
 
-    is_valid = models.BooleanField(
-        default=False, 
-        verbose_name=u"Валиден"
-    )
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата изменения")
+    updated_by = models.ForeignKey(User, related_name='+up+', blank=True, null=True, verbose_name="Изменил")
 
-    is_published = models.BooleanField(
-        default=False, 
-        verbose_name=u"Опубликован"
-    )
+    rubrics = models.ManyToManyField(Rubric, blank=True, null=True, verbose_name="Рубрики")
 
-    available = models.BooleanField(
-        default=False, 
-        verbose_name=u"В наличии"
-    )
+    is_valid = models.BooleanField(default=False, verbose_name="Валиден")
+
+    is_published = models.BooleanField(default=False, verbose_name="Опубликован")
+
+    available = models.BooleanField(default=False, verbose_name="В наличии")
     
-    #sale = models.FloatField(choices=sale_rate, blank=True, null=True, verbose_name="Скидка")
-    """
+    sale = models.FloatField(choices=sale_rate, blank=True, null=True, verbose_name="Скидка")
+
     def get_full_image_path(self):
         if self.image :
             return os.path.join(settings.MEDIA_ROOT, self.image.name)
@@ -254,7 +219,6 @@ class Product(Proto) :
     @staticmethod
     def subset_of_special_price(c = 6):
         return Product.objects.filter(is_published=True, is_special_price=True).order_by('?')[:c]
-    """
 
     class Meta :
         verbose_name = "Продукт"

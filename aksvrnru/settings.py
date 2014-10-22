@@ -21,16 +21,12 @@ INSTALLED_APPS = (
     'products',
     'markdown_deux',
     'pages',
-    'kombu.transport.django',
-    'djcelery',
     'userprofiles',
     'entities',
-    #'south',
+    'vendors',
+    'rubrics',
+    'utils',
 )
-
-CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
-CELERY_CONCURRENCY = 2
-BROKER_URL = 'django://'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

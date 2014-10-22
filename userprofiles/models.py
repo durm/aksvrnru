@@ -4,5 +4,14 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, unique=True, verbose_name="Пользователь")
-    phone = models.CharField(max_length=10, verbose_name="Телефон")
+
+    user = models.OneToOneField(
+        User, 
+        unique=True, 
+        verbose_name=u"Пользователь"
+    )
+
+    phone = models.CharField(
+        max_length=10, 
+        verbose_name=u"Телефон"
+    )

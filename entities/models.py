@@ -1,32 +1,48 @@
 #-*- coding: utf-8 -*-
 
 from django.db import models
-import uuid
-from django.db.models.signals import pre_delete, pre_save
-from django.dispatch.dispatcher import receiver
-from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
+from utils.models import Proto
+import zipfile
+from aksvrnru.utils import *
 
-class Entity(models.Model):
+def get_filename(instance, filename):
+    return u"entities/%s" % get_id()
 
-    name = models.CharField(max_length=255, blank=True, null=True, verbose_name=u"Название")
-    desc = models.TextField(blank=True, null=True, verbose_name=u"Описание")
+class Entity(Proto):
 
-    file = models.FileField(upload_to=u"entities", null=False, verbose_name=u"Файл")
+    file = models.FileField(
+        upload_to=get_filename, 
+        null=False, 
+        verbose_name=u"Файл"
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=u"Дата создания")
-    created_by = models.ForeignKey(User, related_name='+cr+', blank=True, null=True, verbose_name=u"Создал")
-
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата изменения")
-    updated_by = models.ForeignKey(User, related_name='+up+', blank=True, null=True, verbose_name=u"Изменил")
-    
-    def __unicode__(self):
-        name = self.name if self.name else self.file.name
-        return u"%s" % (name)
+    @staticmethod
+    def uploadFromZip(zp):
+        def is_entity(e):
+            return e.endswith(".jpg")
+        def u(e):
+            return e
+        def get_name(e):
+            return e.split("/")[-1][:-4]
+        def store(zf, e): 
+            try:
+                desc = e
+                name = get_name(e)
+                entity = Entity(
+                    name=name, 
+                    desc=desc, 
+                    file=ContentFile(zf.open(e).read())
+                )
+                entity.save()
+                print(name)
+            except Exception as e:
+                print("Error: %s" % str(e))
+        with zipfile.ZipFile(zp, "r") as zf :
+            for e in zf.namelist() :
+                if is_entity(e) :
+                    store(zf, e)
 
     class Meta :
         verbose_name = u"Файлы"
-
-@receiver(pre_delete, sender=Entity)
-def _entity_delete_pre(sender, instance, **kwargs):
-    instance.file.delete(False)
 

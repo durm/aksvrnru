@@ -1,10 +1,3 @@
-from django.shortcuts import render
-from entities.models import Entity
+#-*- coding: utf-8 -*-
 
-def upload_entity(request):
-    return render("1")
-
-def do_upload_entity(request):
-    f = request.FILES['file']
-    entity = Entity.objects.create(file=f)
-    return render(str(entity))
+from django.shortcuts import render, render_to_response

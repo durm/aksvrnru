@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+"""
 from django.shortcuts import redirect, render_to_response
 from products.models import Rubric
 from pages.views import get_context
@@ -140,3 +141,5 @@ def send_feedback(request):
         return error(request, u" Сообщение отправлено", u"Ожидайте")
     except Exception as e :
         return error(request, u"Ошибка", u"Не удалось отправить сообщение (%s)" % str(e))
+
+"""
