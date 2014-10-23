@@ -4,6 +4,7 @@ import uuid
 import urllib
 from lxml import html, etree
 import html2text
+import tempfile
 
 try:
     from PIL import Image, ImageOps
@@ -45,3 +46,6 @@ def add_watermark(orig, mark, dest):
     logoim = Image.open(mark)
     baseim.paste(logoim, (baseim.size[0]-logoim.size[0], baseim.size[1]-logoim.size[1]), logoim)
     baseim.save(dest,"PNG")
+
+def get_tempfile():
+    return tempfile.mktemp()

@@ -1,7 +1,5 @@
 #-*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from celery import shared_task
 from django.shortcuts import render
 from products.models import *
 from aksvrnru import settings
@@ -13,7 +11,7 @@ import urllib
 import xlrd
 from multiprocessing.pool import ThreadPool
 from django.core.urlresolvers import reverse
-from products.models import Price
+from pricelog.models import Price
 from django.contrib.auth.models import User
 
 CHILD_RUBRIC_COLOR = 23
@@ -163,7 +161,6 @@ def store_rubric(r, user, parent=None):
     rubric.save()
     return (rubric, created)
 
-@shared_task
 def update_product_with_external_desc(product):
 
     print "Update prd external desc %s" % str(product.id)
@@ -228,7 +225,6 @@ def store_product(rowValues, ws, row, user, current_rubric, wb):
 
     update_product_with_external_desc.delay(product)
 
-@shared_task
 def proc(request, obj):
     
     user = User.objects.get(id=user)
