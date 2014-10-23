@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 
 from django.shortcuts import render
-from products.models import *
+from products.models import Product
 from aksvrnru import settings
 import os
 import traceback
@@ -225,24 +225,20 @@ def store_product(rowValues, ws, row, user, current_rubric, wb):
 
     update_product_with_external_desc.delay(product)
 
-def proc(request, obj):
-    
-    user = User.objects.get(id=user)
-    obj = Price.objects.get(id=obj)
-    
-    if obj.processed() or obj.processing() : return
-
-    Product.objects.all().update(available = False)
-
-    obj.set_processing()
-
+def proc(price):
+   
     try:
-        stats = parse_xlsx_xlrd(get_path(obj.file.name), request)
+        stats = parse_xlsx_xlrd(price.name)
 
-        obj.set_success_result(request.user, get_success_desc(stats))
+        price.desc = get_success_desc(stats)
+        price.result = "success"
+        price.save()
     except Exception as e:
-        print traceback.print_exc()
-        obj.set_error_result(request.user, str(e))
+        price.desc = str(e)
+        price.result = "error"
+        price.save()
+    finally:
+        os.remove(price.name)
 
 def parse_xlsx_xlrd(f, request):
 

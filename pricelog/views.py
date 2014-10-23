@@ -6,6 +6,8 @@ from aksvrnru.views import error
 from utils.views import get_context
 from aksvrnru.utils import *
 from aksvrnru.views import *
+from pricelog.tasks import proc
+import threading
 
 def upload_price(request):
     if request.user.is_authenticated() and request.user.is_staff :
@@ -22,6 +24,13 @@ def do_upload_price(request):
         with open(tmpname, 'w') as destination:
             for chunk in f.chunks():
                 destination.write(chunk)
+
+        price = Price(name=tmpname, result="process")
+        price.save()
+
+        proc(price)
+
+        #threading.Thread(target=proc, args=(price))        
 
         return message(request, u"В обработке!", u"Обработка прайса ожидает своей очереди!")
     else:

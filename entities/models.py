@@ -39,8 +39,11 @@ class Entity(Proto):
             except Exception as e:
                 print("Error: %s" % str(e))
         with zipfile.ZipFile(zp, "r") as zf :
+            c = 0
             for e in zf.namelist() :
                 if is_entity(e) :
+                    c += 1
+                    print c
                     store(zf, e)
 
     class Meta :
