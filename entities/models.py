@@ -6,8 +6,12 @@ from utils.models import Proto
 import zipfile
 from aksvrnru.utils import *
 
-def get_filename(instance, filename):
-    return u"entities/%s" % get_id()
+def get_filename():
+    path = get_id()
+    return u"entities/%s/%s" % (path[:3], path)
+
+def get_filename_model(instance, filename):
+    return get_filename()
 
 class Entity(Proto):
 
@@ -29,12 +33,12 @@ class Entity(Proto):
             try:
                 desc = e
                 name = get_name(e)
+                content = ContentFile(zf.open(e).read())
                 entity = Entity(
                     name=name, 
-                    desc=desc, 
-                    file=ContentFile(zf.open(e).read())
+                    desc=desc 
                 )
-                entity.save()
+                entity.file.save(get_filename(), content, save=True)
                 print(name)
             except Exception as e:
                 print("Error: %s" % str(e))
@@ -43,7 +47,7 @@ class Entity(Proto):
             for e in zf.namelist() :
                 if is_entity(e) :
                     c += 1
-                    print c
+                    print "%s) " % str(c),
                     store(zf, e)
 
     class Meta :
