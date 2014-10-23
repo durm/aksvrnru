@@ -16,7 +16,7 @@ def get_filename_model(instance, filename):
 class Entity(Proto):
 
     file = models.FileField(
-        upload_to=get_filename, 
+        upload_to=get_filename_model, 
         null=False, 
         verbose_name=u"Файл"
     )
