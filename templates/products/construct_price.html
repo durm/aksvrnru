@@ -1,0 +1,81 @@
+{% extends "base/base.html" %}
+
+{% block title %}
+Выгрузка прайса
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <form class="construct_form form-horizontal" role="form" action="{% url 'construct_price' %}" method="post">
+        {% csrf_token %}
+        <legend>Выгрузка прайса</legend>
+        {% if user.is_authenticated and user.is_superuser %}
+        <div class="form-group">
+            <label for="" class="col-sm-2 control-label">Тип прайса</label>
+            <div class="col-sm-10">
+                <label class="radio-inline"><input type="radio" name="price_type" value="retail" checked="checked"/> Для розницы</label>
+                <label class="radio-inline"><input type="radio" name="price_type" value="trade"/> Для опта</label>
+                
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Скидка</label>
+            <div class="col-sm-10">
+                <select name="sale" class="form-control">
+                    {% for sale in sale_rate %}
+                        <option value="{{ sale.0 }}">{{ sale.1 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label for="" class="col-sm-2 control-label">Рубрики</label>
+            <div class="col-sm-10">
+                <div class="btn-group">
+                    <input type="button" class="btn btn-default set_checked" value="Выделить все"/>
+                    <input type="button" class="btn btn-default set_unchecked" value="Снять выделение"/>
+                    <input type="button" class="btn btn-default construct_price" value="Сформировать прайс"/>
+                </div>
+                <br/><br/>
+                {%include "hierarchy/rubric_roots.html" %}
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="button" class="btn btn-default construct_price" value="Сформировать прайс"/>
+            </div>
+        </div>
+    
+    </form>
+</div>
+{% endblock %}
+
+{% block libs %}
+    <script>
+    $(document).ready(function(){
+        $("input[name=rubric]").change(function(){
+            var self = $(this);
+            var chs=self.parent().parent().find("ul:first").find("input[name=rubric]");
+            if (self.is(":checked")) {
+                chs.prop('checked', true);
+            }else{
+                chs.removeAttr("checked");
+            }
+        });
+
+        $(".set_checked").click(function(){
+            $("input[name=rubric]").prop('checked', true);
+        });
+
+        $(".set_unchecked").click(function(){
+            $("input[name=rubric]").removeAttr("checked");
+        });
+
+        $(".construct_price").click(function(){
+            var f = $(".construct_form");
+            f.submit();
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base/base.html" %}
+
+{% load markdown_deux_tags %}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-12 col-sm-9">
+            {% include "common/parts/jumbotron.html" %}
+            {% include "common/parts/special_prices.html" %}
+        </div>
+        <div class="col-xs-12 col-sm-3">
+            {% include "common/parts/search.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block libs %}
+<script>
+    $(document).ready(function(){
+        var max = -1;
+        $(".special_product").each(function() {
+            var h = $(this).height();
+            max = h > max ? h : max;
+        });
+        $(".special_product").height(max)
+    });
+</script>
+{% endblock %}

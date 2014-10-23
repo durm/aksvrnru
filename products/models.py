@@ -51,17 +51,17 @@ class Product(Proto) :
         verbose_name=u"Розничная цена"
     )
 
-    """
     retail_price_in_price = models.FloatField(
-        default=0, 
-        verbose_name=u"Розничная цена"
+        null=True,
+        blank=True, 
+        verbose_name=u"Розничная цена в прайсе"
     )
 
     retail_price_prev = models.FloatField(
-        default=0, 
+        null=True,
+        blank=True, 
         verbose_name=u"Прежняя розн. цена"
     )
-    """
 
     specify_trade_price = models.BooleanField(
         default=False, 

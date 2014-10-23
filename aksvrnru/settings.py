@@ -26,6 +26,7 @@ INSTALLED_APPS = (
     'vendors',
     'rubrics',
     'utils',
+    'pricelog',
 )
 
 MIDDLEWARE_CLASSES = (

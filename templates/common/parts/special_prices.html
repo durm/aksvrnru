@@ -1,0 +1,7 @@
+{% if special_price_products %}
+<div class="row" class="special_products">
+    {% for prd in special_price_products %}
+        {% include "pages/special_product_view.html" %}
+    {% endfor %}
+</div>
+{% endif %}

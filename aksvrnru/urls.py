@@ -8,11 +8,12 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    #url(r'^$', 'pages.views.home', name='home'),
-    #url(r'^products/', include('products.urls')),
-    #url(r'^pages/', include('pages.urls')),
-    #url(r'^userprofiles/', include('userprofiles.urls')),
-    # url(r'^blog/', include('blog.urls')),
+    
+    url(r'^$', 'pages.views.home', name='home'),
+    url(r'^products/', include('products.urls')),
+    url(r'^pages/', include('pages.urls')),
+    url(r'^userprofiles/', include('userprofiles.urls')),
 
+    url(r'^pricelog/', include('pricelog.urls')),
     url(r'^admin/', include(admin.site.urls)),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

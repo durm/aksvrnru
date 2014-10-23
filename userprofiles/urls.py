@@ -3,7 +3,6 @@
 from django.conf.urls import patterns, url
 
 urlpatterns = patterns('',
-    """
     url(r'^login_page/$', 'userprofiles.views.login_page', name='login_page'),
     url(r'^login/$', 'userprofiles.views.login_proc', name='login'),
     url(r'^me/$', 'userprofiles.views.me', name='me'),
@@ -17,5 +16,4 @@ urlpatterns = patterns('',
     url(r'^send_bookcall/$', 'userprofiles.views.send_bookcall', name='send_bookcall'),
     url(r'^feedback/$', 'userprofiles.views.feedback', name='feedback'),
     url(r'^send_feedback/$', 'userprofiles.views.send_feedback', name='send_feedback'),
-    """
 )

@@ -1,9 +1,10 @@
 #-*- coding: utf-8 -*-
 
-"""
 from django.shortcuts import redirect, render_to_response, render
-from products.models import Rubric, Price, Product, Vendor, sale_rate
-from pages.views import get_context
+from products.models import Product
+from vendors.models import Vendor
+from rubrics.models import Rubric
+from utils.views import get_context
 from django.contrib.auth import authenticate
 from aksvrnru.views import error, message
 from django.core.context_processors import csrf
@@ -17,32 +18,14 @@ from datetime import datetime
 from aksvrnru import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
-from products.tasks import proc
+#from products.tasks import proc
 
-def rubrics_hierarchy(request, choose=False, tpl='hierarchy/hierarchy.html', is_published=True):
+def rubrics_hierarchy(request, choose=False, tpl='products/hierarchy.html', is_published=True):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True)
     if rubrics.count() :
         return render_to_response(tpl, {"rubrics":rubrics, "choose":choose, "sale_rate": sale_rate}, get_context(request))
     else:
         return message(request, u"Нет активных рубрик!", u"")
-
-def upload_price(request):
-    if request.user.is_authenticated() and request.user.is_staff :
-        return render_to_response("products/upload_price.html", {}, get_context(request))
-    else:
-        return error(request, u"Ошибка доступа", u"Только персонал может загрузить и распарсить прайс!")
-
-def do_upload_price(request):
-    if request.user.is_authenticated() and request.user.is_staff :
-        f = request.FILES['price']
-        price = Price.objects.create(name=f.name, file=f)
-        price.save()
-        
-        proc.delay(request.user.id, price.id)
-        
-        return message(request, u"В обработке!", u"Обработка прайса ожидает своей очереди!")
-    else:
-        return error(request, u"Ошибка доступа", u"Только персонал может загрузить и распарсить прайс!")
 
 def listing(request):
     
@@ -157,8 +140,8 @@ def render_product(request, product):
 def get_rubrics_hierarchy_for_upload(request):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True).count()
     if rubrics == 0 :
-        return message(request, "Нет активных рубрик!", "Нельзя сгенерировать прайс!")
-    return rubrics_hierarchy(request, choose=True, tpl='hierarchy/construct_price.html')
+        return message(request, u"Нет активных рубрик!", u"Нельзя сгенерировать прайс!")
+    return rubrics_hierarchy(request, choose=True, tpl='products/construct_price.html')
 
 def construct_price(request):
     
@@ -171,7 +154,7 @@ def construct_price(request):
     rubrics_ids = request.POST.getlist("rubric")
 
     if price_type is None or len(rubrics_ids) == 0 :
-        return error(request, "Ошибка", "Не задан тип прайса или не выбраны рубрики")
+        return error(request, u"Ошибка", u"Не задан тип прайса или не выбраны рубрики")
 
     wb = xlwt.Workbook()
     ws = wb.add_sheet('Page1')
@@ -254,4 +237,3 @@ def get_rubric_stile(t="grey50"):
 
 def get_root_rubric_style():
     return get_rubric_stile(t="grey80")
-"""

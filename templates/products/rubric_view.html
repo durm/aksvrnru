@@ -1,0 +1,15 @@
+<li {% if choose %}class="list-unstyled"{% endif %}>
+    {% if choose %}
+        <label for="rubric_{{ rubric.id }}">
+            <input type="checkbox" checked="checked" id="rubric_{{ rubric.id }}" name="rubric" value="{{rubric.id}}"/>
+            {{rubric.name}}
+        </label>
+    {% else %}
+        <a href="{% url 'listing' %}?rubric={{ rubric.id }}">{{rubric.name}}</a>
+    {% endif %}
+    {%if rubric.has_children %}
+        {%with rubrics=rubric.children template_name="hierarchy/rubric_roots.html" %}
+             {%include template_name%}
+        {%endwith%}
+    {%endif%}
+</li>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>
+        {% block title %}{% endblock %}
+    </title>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    {% block head %}{% endblock %}
+    <style>
+        body {
+          padding-top: 80px;
+        }
+        .starter-template {
+          padding: 40px 15px;
+          text-align: center;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>
+</head>
+<body>
+    {% include "base/parts/header.html" %}
+    {% block content %}{% endblock %}
+    <hr/>
+    {% include "base/parts/footer.html" %}
+    <script src="http://yastatic.net/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    {% block libs %}
+    {% endblock %}
+</body>
+</html>
