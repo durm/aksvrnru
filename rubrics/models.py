@@ -6,6 +6,13 @@ from utils.models import Proto
 
 class Rubric(Proto):
 
+    hashsum = models.CharField(
+        max_length=50, 
+        null=True, 
+        blank=True,
+        verbose_name=u"Хэш-сумма"
+    )
+
     parent = models.ForeignKey(
         "self",
         null=True, 

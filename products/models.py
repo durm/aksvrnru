@@ -50,27 +50,15 @@ class Product(Proto) :
         default=0, 
         verbose_name=u"Розничная цена"
     )
-
-    retail_price_in_price = models.FloatField(
-        null=True,
-        blank=True, 
-        verbose_name=u"Розничная цена в прайсе"
-    )
-
-    retail_price_prev = models.FloatField(
-        null=True,
-        blank=True, 
-        verbose_name=u"Прежняя розн. цена"
-    )
-
-    specify_trade_price = models.BooleanField(
+    
+    available_for_trade = models.BooleanField(
         default=False, 
-        verbose_name=u"Уточните опт. цену"
+        verbose_name=u"Доступен для опта"
     )
 
-    specify_retail_price = models.BooleanField(
+    available_for_retail = models.BooleanField(
         default=False, 
-        verbose_name=u"Уточните розн. цену"
+        verbose_name=u"Доступен для розницы"
     )
 
     is_recommend_price = models.BooleanField(
@@ -89,9 +77,9 @@ class Product(Proto) :
         verbose_name=u"Внешняя ссылка"
     )
 
-    by_order = models.BooleanField(
+    trade_by_order = models.BooleanField(
         default=False, 
-        verbose_name=u"Под заказ"
+        verbose_name=u"Опт под заказ"
     )
 
     is_new = models.BooleanField(
@@ -121,132 +109,9 @@ class Product(Proto) :
         verbose_name=u"Опубликован"
     )
 
-    available = models.BooleanField(
-        default=False, 
-        verbose_name=u"В наличии"
-    )
-    
-    #sale = models.FloatField(choices=sale_rate, blank=True, null=True, verbose_name="Скидка")
     """
-    def get_full_image_path(self):
-        if self.image :
-            return os.path.join(settings.MEDIA_ROOT, self.image.name)
-
-    def create_product_thumbnails(self):
-        if self.image :
-            fpath = self.get_full_image_path()
-
-            fpath200 = "%s200" % fpath
-            get_thumbnail(fpath, (250,250), fpath200)
-            add_watermark(fpath200, settings.WATER_MARK, fpath200)
-
-            fpath500 = "%s500" % fpath
-            get_thumbnail(fpath, (500,500), fpath500)
-            add_watermark(fpath500, settings.WATER_MARK, fpath500)
-
-            add_watermark(fpath, settings.WATER_MARK, fpath)
-
-    def get_retail_trade_diff(self):
-        return self.retail_price - self.trade_price
-
-    def validate(self):
-        if self.by_order or ( self.trade_price == 0 or self.retail_price == 0 ) :
-            return True
-        else:
-            return self.get_retail_trade_diff() >= 0
-
-    def check_and_set_validation(self):
-        self.is_valid = self.validate()
-        if not self.is_valid :
-            self.is_published = False
-
-    def lower_then_minimal_retail_price(self):
-        return self.retail_price < MIN_PRICE
-
-    def lower_then_minimal_retail_trade_diff(self):
-        return self.get_retail_trade_diff() < MIN_DIFF
-
-    def skip_calculation(self):
-        return not self.is_valid or self.is_recommend_price or ( self.trade_price == 0 or self.retail_price == 0 ) or self.lower_then_minimal_retail_price() or self.lower_then_minimal_retail_trade_diff()
-
-    def calculate_retail_price(self):
-        if self.skip_calculation() :
-            return
-        self.retail_price = self.get_retail_trade_diff() * PRICE_PERCENT + self.trade_price
-        self.check_and_set_validation()
-
-    def delete_thumbnails(self):
-        if self.image :
-            fpath = self.get_full_image_path()
-            os.remove("%s200" % fpath)
-            os.remove("%s500" % fpath)
-            
-    def same_rubric_products(self, c=6):
-        return Product.subset_by_rubrics(self.rubrics, c)
-    
-    def price_with_sale(self, pr, sl):
-        return pr - (pr * sl)
-    
-    def trade_price_with_sale(self, s=None):
-        if s is None :
-            s = self.sale if self.sale else 0
-        else:
-            s = float(s)
-        return self.price_with_sale(self.trade_price, s)
-    
-    def retail_price_with_sale(self, s=None):
-        if s is None :
-            s = self.sale if self.sale else 0
-        else:
-            s = float(s)
-        return self.price_with_sale(self.retail_price, s)
-
-    def store(self, entry) :
-
-        self.vendor = entry.get("vendor", None)
-
-        self.name = entry.get("name","")
-        self.short_desc = entry.get("short_desc", "")
-        self.desc = entry.get("desc", "")
-
-        self.trade_price = entry.get("trade_price", 0)
-
-        self.retail_price_prev = self.retail_price
-        self.retail_price = entry.get("retail_price", 0)
-        self.retail_price_in_price = self.retail_price
-
-        self.external_link = entry.get("external_link", "")
-
-        self.is_new = entry.get("is_new", False)
-        self.is_special_price = entry.get("is_special_price", False)
-
-        self.is_published = entry.get("is_published", False)
-
-        self.is_recommend_price = entry.get("is_recommend_price", False)
-
-        self.by_order = entry.get("is_by_order", False)
-
-        self.specify_retail_price = entry.get("specify_retail_price", False)
-        self.specify_trade_price = entry.get("specify_trade_price", False)
-
-        if entry.get("created_by", None) is not None :
-            self.created_by = entry.get("created_by", None)
-
-        self.updated_by = entry.get("updated_by", None)
-
-        self.rubrics.add(entry.get("current_rubric", None))
-
-        self.available = True
-
-        self.check_and_set_validation()
-        if self.is_valid :
-            self.calculate_retail_price()
-
-        self.save()
-
-    def __unicode__(self):
-        return "%s" % (self.name)
-    
+    sale = models.FloatField(choices=sale_rate, blank=True, null=True, verbose_name="Скидка")
+ 
     @staticmethod
     def subset_by_rubrics(r, c = 6):
         return Product.objects.filter(is_published=True, rubrics__in=r.all()).order_by('?')[:c]

@@ -18,7 +18,6 @@ from datetime import datetime
 from aksvrnru import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
-#from products.tasks import proc
 
 def rubrics_hierarchy(request, choose=False, tpl='products/hierarchy.html', is_published=True):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True)
@@ -27,6 +26,7 @@ def rubrics_hierarchy(request, choose=False, tpl='products/hierarchy.html', is_p
     else:
         return message(request, u"Нет активных рубрик!", u"")
 
+# listing for products
 def listing(request):
     
     vendors = Vendor.objects.all()
@@ -126,6 +126,7 @@ def id_to_int(i):
     except:
         return None
 
+# get product page
 def get_product(request, num):
     try:
         product = Product.objects.get(id=num)
@@ -134,6 +135,7 @@ def get_product(request, num):
     except Product.DoesNotExist :
         return page_doesnot_exist(request, num)
 
+# product renderer
 def render_product(request, product):
     return render_to_response("products/product.html", {'product':product}, get_context(request))
 
@@ -144,96 +146,10 @@ def get_rubrics_hierarchy_for_upload(request):
     return rubrics_hierarchy(request, choose=True, tpl='products/construct_price.html')
 
 def construct_price(request):
-    
-    price_type = request.POST.get("price_type", "retail")
-    sale = request.POST.get("sale", None)
-    
-    if sale is not None :
-        sale = float(sale.replace(",","."))
-        
-    rubrics_ids = request.POST.getlist("rubric")
+    return render("1")
 
-    if price_type is None or len(rubrics_ids) == 0 :
-        return error(request, u"Ошибка", u"Не задан тип прайса или не выбраны рубрики")
+# get product url
+def get_product_url(product, domain):
+    return xlwt.Formula(u'HYPERLINK("%s%s";"На сайте...")' % (domain, reverse('get_product', kwargs={'num':product.id})))
 
-    wb = xlwt.Workbook()
-    ws = wb.add_sheet('Page1')
 
-    rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True, id__in=rubrics_ids)
-
-    price_desc = u" для розницы " if price_type == "retail" else u" для розницы опта "
-
-    style_string = "borders: top medium, bottom medium, left medium, right medium"
-    style = xlwt.easyxf(style_string)
-
-    product_style_string = "borders: bottom thin, left thin, right thin"
-    product_style = xlwt.easyxf(style_string)
-
-    ws.write(0, 0, u"Прайс%sсгенерирован %s" % (price_desc, str(datetime.now())))
-    ws.write(1, 0, u"Наименование товара", style)
-    ws.write(1, 1, u"Цена", style)
-    ws.write(1, 2, u"Ссылка", style)
-
-    col = ws.col(0)
-    col.width = 1200 * 20
-
-    r = 1
-    for rubric in rubrics :
-        r = write_rubric(ws, r, rubric, get_root_rubric_style(), filt=rubrics_ids, product_style=product_style, sale=sale, price_type=price_type)
-
-    f = StringIO.StringIO()
-
-    wb.save(f)
-
-    response = HttpResponse(f.getvalue(), content_type="application/vnd.ms-excel")
-    response['Content-Disposition'] = 'attachment; filename=price_%s.xls' % str(uuid.uuid4())
-    return response
-
-def write_rubric(ws, r, rubric, style=xlwt.XFStyle(), filt=None, product_style=None, sale=None, price_type="retail"):
-    r += 1
-    ws.write(r, 0, rubric.name, style)
-    ws.write(r, 1, "", style)
-    ws.write(r, 2, "", style)
-    for product in rubric.get_published_products() :
-        r = write_product(ws, r, product, style=product_style, sale=sale, price_type=price_type)
-    childs = rubric.get_published_children()
-    if filt is not None :
-        childs = childs.filter(id__in=filt)
-    for child in childs :
-        r = write_rubric(ws, r, child, get_rubric_stile(), filt=filt, product_style=product_style, sale=sale, price_type=price_type)
-    return r
-
-def get_product_price_by_type_with_sale(product, price_type, sale=None):
-    if product.by_order :
-        return u"Под заказ"
-    if product.is_recommend_price :
-        return product.retail_price
-    if not product.available :
-        return u"--"
-    if sale is None :
-        return product.retail_price_with_sale()
-    else:
-        return product.retail_price_with_sale(s=sale)
-    
-def write_product(ws, r, product, style=None, sale=None, price_type="retail"):
-    r += 1
-    ws.write(r, 0, "%s | %s | %s" % (product.vendor.name, product.name, product.short_desc), style)
-    
-    price = get_product_price_by_type_with_sale(product, price_type, sale)
-    
-    ws.write(r, 1, price, style)
-    ws.write(r, 2, xlwt.Formula(u'HYPERLINK("%s%s";"На сайте...")' % (settings.DOMAIN_, reverse('get_product', kwargs={'num':product.id}))), style)
-    return r
-
-def get_rubric_stile(t="grey50"):
-    style = xlwt.XFStyle()
-    pattern = xlwt.Pattern()
-    pattern.pattern = xlwt.Pattern.SOLID_PATTERN
-    pattern.pattern_fore_colour = xlwt.Style.colour_map[t]
-    style.pattern = pattern
-    style.font.colour_index = xlwt.Style.colour_map['white']
-    style.font.bold = True
-    return style
-
-def get_root_rubric_style():
-    return get_rubric_stile(t="grey80")

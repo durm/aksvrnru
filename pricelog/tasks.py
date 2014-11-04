@@ -1,6 +1,5 @@
 #-*- coding: utf-8 -*-
 
-from django.shortcuts import render
 from products.models import Product
 from aksvrnru import settings
 import os
@@ -9,275 +8,72 @@ from lxml import html, etree
 import uuid
 import urllib
 import xlrd
-from multiprocessing.pool import ThreadPool
 from django.core.urlresolvers import reverse
 from pricelog.models import Price
 from django.contrib.auth.models import User
-
-CHILD_RUBRIC_COLOR = 23
-PARENT_RUBRIC_COLOR = 63
-SPECIAL_PRICE = 40
-IS_NEW = 42
-RECOMMEND_PRICE = 10
-
-def get_path(fpath):
-    return os.path.join(settings.MEDIA_ROOT, fpath)
-
-def get_row_values(ws, row):
-    return ws.row_values(row, start_colx=0, end_colx=6)
-
-def get_prop(r, i):
-    return r[i]
-
-def is_empty_row(r):
-    return is_empty(get_prop(r, 0))
-
-def get_name(r):
-    return get_prop(r, 0)
-
-def get_trade_price(r):
-    return get_prop(r, 1)
-
-def get_retail_price(r):
-    return get_prop(r, 2)
-
-def get_by_order(r):
-    return False
-
-def get_amount(r):
-    return 0
-
-def get_external_link(ws, row):
-    link = ws.hyperlink_map.get((row, 5))
-
-    if link is not None :
-        return link.url_or_path
-    else:
-        return ""
-
-def update_external_link(ws, row, uri):
-    link = ws.hyperlink_map.get((row, 5))
-
-    if link is not None :
-        link.url_or_path = uri
-
-def is_empty(x):
-    return x == ""
-
-def is_rubric(r):
-    return not(is_empty(get_prop(r, 0))) and is_empty(get_prop(r, 1)) and is_empty(get_prop(r, 2)) and is_empty(get_prop(r, 5))
-
-def is_product(r):
-    return not(is_empty(get_prop(r, 0))) and not(is_empty(get_prop(r, 1))) and not(is_empty(get_prop(r, 2))) and not(is_empty(get_prop(r, 5)))
-
-def is_by_order(v):
-    return v == u"Под заказ"
-
-def is_double_dash(v):
-    return v == u"--"
-
-def get_trade_price_and_is_by_order(trade_price):
-    if is_by_order(trade_price) :
-        return (0, True)
-    else:
-        return (get_float(trade_price), False)
-
-def get_float(v):
-    try:
-        return float(v)
-    except:
-        return 0
-
-def make_stats():
-    return {"products": 0, "rubrics": 0}
-
-def inc_products(stats):
-    stats["products"] += 1
-
-def inc_rubrics(stats):
-    stats["rubrics"] += 1
-
-def is_main_rubric(wb, ws, row):
-    cell = ws.cell(row, 0)
-    xs_ind = cell.xf_index
-    xf = wb.xf_list[xs_ind]
-    return xf.background.pattern_colour_index == PARENT_RUBRIC_COLOR
-
-def is_child_rubric(wb, ws, row):
-    cell = ws.cell(row, 0)
-    xs_ind = cell.xf_index
-    xf = wb.xf_list[xs_ind]
-    return xf.background.pattern_colour_index == CHILD_RUBRIC_COLOR
-
-def is_product_special_price(wb, ws, row):
-    cell = ws.cell(row, 0)
-    xs_ind = cell.xf_index
-    xf = wb.xf_list[xs_ind]
-    return xf.background.pattern_colour_index == SPECIAL_PRICE
-
-def is_product_new(wb, ws, row):
-    cell = ws.cell(row, 0)
-    xs_ind = cell.xf_index
-    xf = wb.xf_list[xs_ind]
-    return xf.background.pattern_colour_index == IS_NEW
-
-def is_price_recommend(wb, ws, row):
-    cell = ws.cell(row, 2)
-    xs_ind = cell.xf_index
-    xf = wb.xf_list[xs_ind]
-    return wb.font_list[xf.font_index].colour_index == RECOMMEND_PRICE
-
-def parse_name(fullname, user):
-    parts = fullname.split("|")
-    parts = [i.strip() for i in parts]
-
-    name = parts[1] if len(parts) >= 2 else ""
-
-    vendor, created = Vendor.objects.get_or_create(name=parts[0]) if len(parts) >= 1 else ("", False)
-
-    if created :
-        vendor.created_by = user
-
-    vendor.updated_by = user
-    vendor.save()
-
-    short_desc = parts[2] if len(parts) >= 3 else ""
-
-    return (name, vendor, short_desc)
-
-def store_rubric(r, user, parent=None):
-    name = get_name(r)
-
-    if parent is not None :
-        rubric, created = Rubric.objects.get_or_create(name=name, parent=parent)
-    else:
-        rubric, created = Rubric.objects.get_or_create(name=name, parent__isnull=True)
-
-    rubric.updated_by = user
-    if created :
-        rubric.is_published = True
-        rubric.created_by = user
-
-    rubric.save()
-    return (rubric, created)
-
-def update_product_with_external_desc(product):
-
-    print "Update prd external desc %s" % str(product.id)
-
-    if not product.external_link or product.desc : return
-
-    product.desc = get_external_desc(product.external_link)
-    product.save()
-
-def store_product(rowValues, ws, row, user, current_rubric, wb):
-
-    in_price_desc = get_name(rowValues)
-
-    trade_price = get_trade_price(rowValues)
-    retail_price = get_retail_price(rowValues)
-
-    external_link = get_external_link(ws, row)
-
-    name, vendor, short_desc = parse_name(in_price_desc, user)
-
-    product, created = Product.objects.get_or_create(name=name)
-
-    is_published = True if product.is_published or created else False
-
-    created_by = user if created else None
-
-    is_new = is_product_new(wb, ws, row)
-    is_special_price = is_product_special_price(wb, ws, row)
-    is_recommend_price = is_price_recommend(wb, ws, row)
-
-    prd_by_order = is_by_order(trade_price) or is_by_order(retail_price)
-
-    specify_trade_price = is_double_dash(trade_price)
-    specify_retail_price = is_double_dash(retail_price)
-
-    trade_price = get_float(trade_price)
-    retail_price = get_float(retail_price)
-
-    product_entry = {
-        "in_price_desc": in_price_desc,
-        "name": name,
-        "vendor": vendor,
-        "short_desc": short_desc,
-        "external_link": external_link,
-        "is_published": is_published,
-        "created_by": created_by,
-        "updated_by": user,
-        "is_new": is_new,
-        "is_special_price": is_special_price,
-        "is_recommend_price": is_recommend_price,
-        "current_rubric": current_rubric,
-        "is_by_order": prd_by_order,
-        "specify_retail_price": specify_retail_price,
-        "specify_trade_price": specify_trade_price,
-        "trade_price": trade_price,
-        "retail_price": retail_price,
-    }
-
-    product.store(product_entry)
-
-    update_external_link(ws, row, reverse('get_product', kwargs={'num':product.id}))
-
-    update_product_with_external_desc.delay(product)
+from xlstools.xlstoxml import xls_to_xml_by_path
+from rubrics.models import Rubric
+from vendors.models import Vendor
+from datetime import datetime
 
 def proc(price):
-   
     try:
-        stats = parse_xlsx_xlrd(price.name)
-
-        price.desc = get_success_desc(stats)
+        xmlprice = xls_to_xml_by_path(price.name)
+        store_rubric(xmlprice)
+        price.desc = ""
         price.result = "success"
         price.save()
     except Exception as e:
         price.desc = str(e)
+        print "[%s] Error: %s" % (datetime.now(), str(e))
         price.result = "error"
         price.save()
     finally:
         os.remove(price.name)
 
-def parse_xlsx_xlrd(f, request):
+def store_rubric(item, parent=None) :
+    
+    current_rubric = parent 
+    if item.get("hashsum") :
+        try:
+            rubric = Rubric.objects.get(hashsum=item.get("hashsum"))
+            if rubric.skip :
+                return
+        except Rubric.DoesNotExist :
+            rubric = Rubric.objects.create(hashsum=item.get("hashsum"))
 
-    wb = xlrd.open_workbook(f, formatting_info=True)
-    ws = wb.sheet_by_index(0)
+        rubric.name = item.get("name")
+        rubric.parent = parent
+        rubric.save()
+        current_rubric=rubric
+ 
+    for child in item :
+        if child.tag == "rubric" :
+            current_rubric = store_rubric(child, current_rubric)
+        if child.tag == "product" :
+            store_product(child, current_rubric)
 
-    current_rubric = None
-    parent = None
+def store_product(item, parent):
+    vendor_name = item.get("vendor")
+    vendor, created = Vendor.objects.get_or_create(name=vendor_name)
 
-    stats = make_stats()
+    product, created = Product.objects.get_or_create(name=item.get("name"), vendor=vendor)
+    product.short_desc = item.get("short_desc")
+    product.trade_by_order = item.get("trade_by_order") == "1"
+    product.available_for_trade = item.get("available_for_trade") == "1"    
+    product.available_for_retail = item.get("available_for_retail") == "1"
+    if product.available_for_trade and not product.trade_by_order :
+        product.trade_price = float(item.get("trade_price", 0))
+    if product.available_for_retail :
+        product.retail_price = float(item.get("retail_price", 0))
+    product.is_recommend_price = item.get("is_recommend_price") == "1"
+    product.is_new = item.get("is_new") == "1"
+    product.is_special_price = item.get("is_special_price") == "1"
+    
+    product.external_link = item.get("external_link")
 
-    for row in range(ws.nrows)[4:]:
-        rowValues = get_row_values(ws, row)
+    product.is_published = created or product.is_published
 
-        if is_empty_row(rowValues) :
-            break
-        if is_rubric(rowValues) :
+    product.rubrics.add(parent)
 
-            if is_main_rubric(wb, ws, row) :
-                parent = None
-
-            if is_child_rubric(wb, ws, row) :
-                pass
-
-            current_rubric, created = store_rubric(rowValues, request.user, parent)
-            if is_main_rubric(wb, ws, row) :
-                parent = current_rubric
-
-            inc_rubrics(stats)
-        if is_product(rowValues):
-
-            if current_rubric.skip :
-                continue
-                pass
-
-            store_product(rowValues, ws, row, request.user, current_rubric, wb)
-            inc_products(stats)
-
-    return stats
-
-def get_success_desc(stats):
-    return "Прайс успешно обработан. (рубрики: %s, продукты: %s)" % (stats.get("rubrics",0), stats.get("products", 0))
+    product.save()
