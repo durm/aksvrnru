@@ -19,6 +19,7 @@ INSTALLED_APPS = (
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "previews",
     "products",
     "markdown_deux",
     "pages",
@@ -28,6 +29,7 @@ INSTALLED_APPS = (
     "rubrics",
     "utils",
     "pricelog",
+    "stdimage",
 )
 
 MIDDLEWARE_CLASSES = (

@@ -3,20 +3,20 @@
 from django.db import models
 from utils.models import Proto
 from vendors.models import Vendor
-from entities.models import Entity
+from previews.models import Preview
 from rubrics.models import Rubric
 
 sale_rate = (
-    (0, '0%'),
-    (0.1, '10%'),
-    (0.2, '20%'),
-    (0.3, '30%'),
-    (0.4, '40%'),
-    (0.5, '50%'),
-    (0.6, '60%'),
-    (0.7, '70%'),
-    (0.8, '80%'),
-    (0.9, '90%'),
+    (0, "0%"),
+    (0.1, "10%"),
+    (0.2, "20%"),
+    (0.3, "30%"),
+    (0.4, "40%"),
+    (0.5, "50%"),
+    (0.6, "60%"),
+    (0.7, "70%"),
+    (0.8, "80%"),
+    (0.9, "90%"),
 )
 
 class Product(Proto) :
@@ -34,8 +34,8 @@ class Product(Proto) :
         verbose_name=u"Краткое описание"
     )
 
-    entities = models.ManyToManyField(
-        Entity, 
+    previews = models.ManyToManyField(
+        Preview, 
         blank=True, 
         null=True, 
         verbose_name=u"Картинки"
@@ -114,11 +114,11 @@ class Product(Proto) :
  
     @staticmethod
     def subset_by_rubrics(r, c = 6):
-        return Product.objects.filter(is_published=True, rubrics__in=r.all()).order_by('?')[:c]
+        return Product.objects.filter(is_published=True, rubrics__in=r.all()).order_by("?")[:c]
     
     @staticmethod
     def subset_of_special_price(c = 6):
-        return Product.objects.filter(is_published=True, is_special_price=True).order_by('?')[:c]
+        return Product.objects.filter(is_published=True, is_special_price=True).order_by("?")[:c]
     """
 
     class Meta :
