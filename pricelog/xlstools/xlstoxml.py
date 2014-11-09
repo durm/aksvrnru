@@ -5,11 +5,14 @@ import xlrd
 from datetime import datetime
 from utils import *
 
+def clean_quote(s):
+    return s.replace("&quot;","")
+
 def parse_name(fullname):
     parts = fullname.split("|")
-    vendor = normalize_space(parts[0])
-    name = normalize_space(parts[1]) if len(parts) >= 2 else None
-    short_desc = normalize_space(parts[2]) if len(parts) >= 3 else None
+    vendor = clean_quote(normalize_space(parts[0]))
+    name = clean_quote(normalize_space(parts[1])) if len(parts) >= 2 else None
+    short_desc = clean_quote(normalize_space(parts[2])) if len(parts) >= 3 else None
     return (vendor, name, short_desc)
 
 def create_product(wb, ws, row):

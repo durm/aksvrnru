@@ -22,7 +22,7 @@ from django.db.models import Q
 def rubrics_hierarchy(request, choose=False, tpl='products/hierarchy.html', is_published=True):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True)
     if rubrics.count() :
-        return render_to_response(tpl, {"rubrics":rubrics, "choose":choose, "sale_rate": sale_rate}, get_context(request))
+        return render_to_response(tpl, {"rubrics":rubrics, "choose":choose, "sale_rate": None}, get_context(request))
     else:
         return message(request, u"Нет активных рубрик!", u"")
 
@@ -92,7 +92,7 @@ def listing(request):
         
     qparams = {'q_filter':q_filter, 'vendor_filter': map(id_to_int, vendor_filter), 'price_from_filter':price_from_filter, 'price_to_filter':price_to_filter, 'available_filter':available_filter}
     
-    qd = QueryDict(request.GET.urlencode(), mutable=True)
+    qd = request.GET.copy()
     try:
         qd.pop('page')
     except:

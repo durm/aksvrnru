@@ -8,7 +8,7 @@
         <a href="{% url 'listing' %}?rubric={{ rubric.id }}">{{rubric.name}}</a>
     {% endif %}
     {%if rubric.has_children %}
-        {%with rubrics=rubric.children template_name="hierarchy/rubric_roots.html" %}
+        {%with rubrics=rubric.children template_name="products/rubric_roots.html" %}
              {%include template_name%}
         {%endwith%}
     {%endif%}

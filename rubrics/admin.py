@@ -2,5 +2,16 @@
 
 from django.contrib import admin
 from rubrics.models import Rubric
+from django import forms
 
-admin.site.register(Rubric)
+class RubricForm(forms.ModelForm):
+
+    class Meta:
+        model = Rubric
+        exclude = ['created_by', 'updated_by','created_at', 'updated_at']
+
+class RubricAdmin(admin.ModelAdmin):
+    list_filter = ('is_published', 'skip')
+    form = RubricForm
+
+admin.site.register(Rubric, RubricAdmin)

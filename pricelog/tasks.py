@@ -14,44 +14,84 @@ from django.contrib.auth.models import User
 from xlstools.xlstoxml import xls_to_xml_by_path
 from rubrics.models import Rubric
 from vendors.models import Vendor
+from products.models import Product
 from datetime import datetime
+import traceback
 
 def proc(price):
     try:
         xmlprice = xls_to_xml_by_path(price.name)
-        store_rubric(xmlprice)
+        
+        products = Product.objects.all().update(available_for_trade=False, available_for_retail=False)
+        #set_products_unavailable(products)
+        
+        store_rubrics(xmlprice)
+        link_rubrics(xmlprice)
+        store_documents(xmlprice)
+        
         price.desc = ""
         price.result = "success"
         price.save()
     except Exception as e:
         price.desc = str(e)
         print "[%s] Error: %s" % (datetime.now(), str(e))
+        traceback.print_exc()
         price.result = "error"
         price.save()
     finally:
         os.remove(price.name)
 
-def store_rubric(item, parent=None) :
-    
-    current_rubric = parent 
-    if item.get("hashsum") :
+def store_rubrics(xmlprice):
+    for c, item in enumerate(xmlprice.xpath(".//rubric[@hashsum]")):
         try:
             rubric = Rubric.objects.get(hashsum=item.get("hashsum"))
             if rubric.skip :
-                return
+                continue
         except Rubric.DoesNotExist :
             rubric = Rubric.objects.create(hashsum=item.get("hashsum"))
+            rubric.is_published = True
 
         rubric.name = item.get("name")
+        rubric.save()
+        print "%s) store_rubric %s" % (str(c), item.get("name"))
+
+def link_rubrics(xmlprice):
+    for c, item in enumerate(xmlprice.xpath(".//rubric[@hashsum]")):
+        try:
+            rubric = Rubric.objects.get(hashsum=item.get("hashsum"))
+        except Rubric.DoesNotExist :
+            print "-- error rubric does not exist %s" % item.get("hashsum")
+            continue
+        
+        parent = None
+        parent_item = item.getparent()
+        if parent_item is not None and "hashsum" in parent_item.attrib :
+            try:
+                parent = Rubric.objects.get(hashsum=parent_item.get("hashsum"))
+            except Rubric.DoesNotExist :
+                print "-- error rubric does not exist %s" % item.get("hashsum")
+                
         rubric.parent = parent
         rubric.save()
-        current_rubric=rubric
- 
-    for child in item :
-        if child.tag == "rubric" :
-            current_rubric = store_rubric(child, current_rubric)
-        if child.tag == "product" :
-            store_product(child, current_rubric)
+        
+        print "%s) link_rubrics %s to %s" % (str(c), item.get("name", ""), parent_item.get("name", "") if parent_item is not None else "None")
+        
+def store_documents(xmlprice):
+    for c, item in enumerate(xmlprice.xpath(".//product")) :
+        parent = None 
+        parent_node = item.getparent()
+        if parent_node is not None and "hashsum" in parent_node.attrib :
+            try:
+                parent = Rubric.objects.get(hashsum=parent_node.get("hashsum"))
+            except Rubric.DoesNotExist :
+                continue
+        else:
+            continue
+        try:
+            store_product(item, parent)
+            print "%s) store_document %s" % (str(c), item.get("name", ""))
+        except Exception as e:
+            print "-- error with %s: %s" % (item.get("name"), str(e))
 
 def store_product(item, parent):
     vendor_name = item.get("vendor")

@@ -37,13 +37,13 @@
                 {% for product in products %}
                 <div class="media" style="position:relative; border-bottom: #ececec solid 1px;">
                     <a class="pull-left" href="{% url 'get_product' product.id %}">
-                        <img src="{% static 'no-photo.png' %}"  data-src="holder.js/300x300" class="img-responsive" alt="Responsive image"/>
+                        <img src="{% if product.previews.all.0 %}{{product.previews.all.0.image.thumbnail.url}}{% else %}{% static 'no-photo.png' %}{% endif %}"  data-src="holder.js/300x300" class="pull-left img-responsive" style="margin: 0px 20px 20px 0px;" alt="{{product.name}} | {{ product.short_desc }}"/>
                     </a>
                     <div class="pull-right" style="width: 125px;">
                         <div>{{ product.retail_price }}р.</div>
                         <div>
                             <small>
-                                {% if product.available %}
+                                {% if product.available_for_retail %}
                                     <span class="glyphicon glyphicon-ok"></span> Есть в наличии
                                 {% else %}
                                     Нет в наличии

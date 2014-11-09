@@ -109,9 +109,6 @@ class Product(Proto) :
         verbose_name=u"Опубликован"
     )
 
-    """
-    sale = models.FloatField(choices=sale_rate, blank=True, null=True, verbose_name="Скидка")
- 
     @staticmethod
     def subset_by_rubrics(r, c = 6):
         return Product.objects.filter(is_published=True, rubrics__in=r.all()).order_by("?")[:c]
@@ -119,7 +116,18 @@ class Product(Proto) :
     @staticmethod
     def subset_of_special_price(c = 6):
         return Product.objects.filter(is_published=True, is_special_price=True).order_by("?")[:c]
-    """
-
+    
+    @staticmethod
+    def linkToPreviews():
+        for c, product in enumerate(Product.objects.all()) :
+            previews = Preview.objects.filter(name__icontains=product.name).filter(name__icontains=product.vendor.name)
+            if previews.count() :
+                product.previews.clear()
+                for preview in previews :
+                    product.previews.add(preview)
+                    print "-- add %s" % preview.name
+                #product.save()
+                print "%s) %s #%s" % (str(c), product.name, str(product.id))
+    
     class Meta :
-        verbose_name = "Продукт"
+        verbose_name = u"Продукт"

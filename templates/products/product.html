@@ -9,13 +9,14 @@
 
 {% block content %}
 <div class="container">
-    <img src="{% static 'no-photo.png' %}"  data-src="holder.js/300x300" class="pull-left img-responsive" style="margin: 0px 20px 20px 0px;" alt="Responsive image"/>
+    
+    <img src="{% if product.previews.all.0 %}{{product.previews.all.0.image.medium.url}}{% else %}{% static 'no-photo.png' %}{% endif %}"  data-src="holder.js/300x300" class="pull-left img-responsive" style="margin: 0px 20px 20px 0px;" alt="{{product.name}} | {{ product.short_desc }}"/>
 
     <h1 class="post-title">{{ product.vendor.name }} {{product.name}}</h1>
     {% if product.short_desc %}
         <p>{{ product.short_desc }}</p>
     {% endif %}
-    {% if product.available %}
+    {% if product.available_for_retail %}
         <div>Есть в наличии</div>
         <div>{{ product.retail_price }}р</div>
     {% else %}
