@@ -52,14 +52,14 @@ def store_rubrics(xmlprice):
         rubric.name = item.get("name")
         rubric.colour_index = item.get("colour_index")
         rubric.save()
-        print "%s) store_rubric %s" % (str(c), item.get("name"))
+        #print "%s) store_rubric %s" % (str(c), item.get("name"))
 
 def link_rubrics(xmlprice):
     for c, item in enumerate(xmlprice.xpath(".//rubric[@hashsum]")):
         try:
             rubric = Rubric.objects.get(hashsum=item.get("hashsum"))
         except Rubric.DoesNotExist :
-            print "-- error rubric does not exist %s" % item.get("hashsum")
+            #print "-- error rubric does not exist %s" % item.get("hashsum")
             continue
         
         parent = None
@@ -68,12 +68,12 @@ def link_rubrics(xmlprice):
             try:
                 parent = Rubric.objects.get(hashsum=parent_item.get("hashsum"))
             except Rubric.DoesNotExist :
-                print "-- error rubric does not exist %s" % item.get("hashsum")
+                # print "-- error rubric does not exist %s" % item.get("hashsum")
                 
         rubric.parent = parent
         rubric.save()
         
-        print "%s) link_rubrics %s to %s" % (str(c), item.get("name", ""), parent_item.get("name", "") if parent_item is not None else "None")
+        #print "%s) link_rubrics %s to %s" % (str(c), item.get("name", ""), parent_item.get("name", "") if parent_item is not None else "None")
         
 def store_documents(xmlprice):
     for c, item in enumerate(xmlprice.xpath(".//product")) :
@@ -88,9 +88,9 @@ def store_documents(xmlprice):
             continue
         try:
             store_product(item, parent)
-            print "%s) store_document %s" % (str(c), item.get("name", ""))
+            # print "%s) store_document %s" % (str(c), item.get("name", ""))
         except Exception as e:
-            print "-- error with %s: %s" % (item.get("name"), str(e))
+            # print "-- error with %s: %s" % (item.get("name"), str(e))
 
 def store_product(item, parent):
     vendor_name = item.get("vendor")
