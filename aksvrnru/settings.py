@@ -8,7 +8,7 @@ SECRET_KEY = "=18m%uc2k%c$0=f_#k^2vjm@se9e%lo9i=d@!a^v_n^qdkyj6o"
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = ["aks.djangohost.name"]
+ALLOWED_HOSTS = ["aks.djangohost.name", "aksvrn.ru"]
 
 DOMAIN_ = "http://aks.djangohost.name/"
 
@@ -47,8 +47,8 @@ WSGI_APPLICATION = "aksvrnru.wsgi.application"
 
 MEDIA_URL = "/media/"
 
-if os.path.exists("/home/aksdjang") :
-    sys.path.append("/home/aksdjang")
+if os.path.exists("/home/aksvrnru") :
+    sys.path.append("/home/aksvrnru/config")
 else:
     sys.path.append("..")
     

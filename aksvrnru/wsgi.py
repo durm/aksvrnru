@@ -1,10 +1,7 @@
 #-*- coding: utf-8 -*-
 
-import sys
-sys.path.insert(0, "/home/durm/envs/aksvrn/lib/python2.7/site-packages")
-
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "aksvrnru.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "aksvrn_ru.settings")
 
 os.environ['LANG']='ru_RU.UTF-8'
 
