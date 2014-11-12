@@ -49,16 +49,16 @@ class Preview(Proto):
                     desc=desc 
                 )
                 entity.image.save(get_filename(), content, save=True)
-                print(name)
+                #print(name)
             except Exception as e:
-                print("Error: %s" % str(e))
+                #print("Error: %s" % str(e))
                 traceback.print_exc()
         with zipfile.ZipFile(zp, "r") as zf :
             c = 0
             for e in zf.namelist() :
                 if is_entity(e) :
                     c += 1
-                    print "%s) " % str(c),
+                    #print "%s) " % str(c),
                     store(zf, e)
     
     class Meta :
