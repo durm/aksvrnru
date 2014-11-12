@@ -33,9 +33,7 @@ def proc(price):
         price.result = "success"
         price.save()
     except Exception as e:
-        price.desc = str(e)
-        print "[%s] Error: %s" % (datetime.now(), str(e))
-        traceback.print_exc()
+        price.desc = "[%s] Error: %s %s" % (datetime.now(), str(e), traceback.format_exc())
         price.result = "error"
         price.save()
     finally:
