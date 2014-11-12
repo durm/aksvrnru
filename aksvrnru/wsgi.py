@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "aksvrn_ru.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "aksvrnru.settings")
 
 os.environ['LANG']='ru_RU.UTF-8'
 
