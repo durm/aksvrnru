@@ -3,6 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from utils.models import Proto
+from lxml import etree
 
 class Rubric(Proto):
 
@@ -11,6 +12,13 @@ class Rubric(Proto):
         null=True, 
         blank=True,
         verbose_name=u"Хэш-сумма"
+    )
+    
+    colour_index = models.CharField(
+        max_length=50, 
+        null=True, 
+        blank=True,
+        verbose_name=u"Код цвета"
     )
 
     parent = models.ForeignKey(
@@ -38,7 +46,7 @@ class Rubric(Proto):
 
     def get_published_children(self):
         return self.children().filter(is_published=True)
-
+    
     """
     def get_products(self):
         return Product.objects.filter(rubrics__in=[self])
@@ -46,6 +54,14 @@ class Rubric(Proto):
     def get_published_products(self):
         return self.get_products().filter(is_published=True)
     """
+    
+    def to_xml(self):
+        """<rubric name="%s" colour_index="%s" hashsum="%s">"""
+        rxml = etree.Element("rubric")
+        rxml.set("name", self.name)
+        rxml.set("colour_index", self.colour_index)
+        rxml.set("hashsum", self.hashsum)
+        return rxml
 
     class Meta :
         verbose_name = u"Рубрика"

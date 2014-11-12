@@ -52,6 +52,7 @@ def store_rubrics(xmlprice):
             rubric.is_published = True
 
         rubric.name = item.get("name")
+        rubric.colour_index = item.get("colour_index")
         rubric.save()
         print "%s) store_rubric %s" % (str(c), item.get("name"))
 

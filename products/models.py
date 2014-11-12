@@ -5,6 +5,7 @@ from utils.models import Proto
 from vendors.models import Vendor
 from previews.models import Preview
 from rubrics.models import Rubric
+from lxml import etree
 
 sale_rate = (
     (0, "0%"),
@@ -128,6 +129,12 @@ class Product(Proto) :
                     print "-- add %s" % preview.name
                 #product.save()
                 print "%s) %s #%s" % (str(c), product.name, str(product.id))
+    
+    def to_xml(self):
+        pxml = etree.Element("product")
+        pxml.set("id", str(self.id))
+        pxml.set("name", self.name)
+        return pxml
     
     class Meta :
         verbose_name = u"Продукт"
