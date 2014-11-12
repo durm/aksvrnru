@@ -68,6 +68,7 @@ def link_rubrics(xmlprice):
             try:
                 parent = Rubric.objects.get(hashsum=parent_item.get("hashsum"))
             except Rubric.DoesNotExist :
+                pass
                 # print "-- error rubric does not exist %s" % item.get("hashsum")
                 
         rubric.parent = parent
@@ -90,6 +91,7 @@ def store_documents(xmlprice):
             store_product(item, parent)
             # print "%s) store_document %s" % (str(c), item.get("name", ""))
         except Exception as e:
+            pass
             # print "-- error with %s: %s" % (item.get("name"), str(e))
 
 def store_product(item, parent):
