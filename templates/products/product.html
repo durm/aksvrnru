@@ -24,14 +24,13 @@
     {% endif %}
     <div class="clearfix"></div>
     {% if product.desc %}
-        <div>{{ product.desc }}</div>
+        <div>{{ product.desc|markdown }}</div>
     {% endif %}
     {% with same_rubric_products=product.same_rubric_products %}
         {% if same_rubric_products %}
             <div>
             <h3>Торары из той же рубрики</h3>
             <div class="row">
-            
             {% for prd in same_rubric_products %}
                 {% include "pages/special_product_view.html" %}
             {% endfor %}
