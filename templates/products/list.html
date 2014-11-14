@@ -100,6 +100,7 @@
                 .removeAttr('selected')
                 .not(':button, :submit, :reset, :hidden, :radio, :checkbox')
                 .val('');
+            $('select').val('').trigger('chosen:updated');
             $('select').chosen('destroy');  
 
             $('select').prop("selectedIndex", -1);   
