@@ -96,7 +96,7 @@
         $("select").chosen();
         $("#do_search_reset").click(function(){
             $('select').val('').trigger('chosen:updated');
-            $(':input','#myform')
+            $("#search_form").find(':input','#myform')
                 .removeAttr('checked')
                 .removeAttr('selected')
                 .not(':button, :submit, :reset, :hidden, :radio, :checkbox')
