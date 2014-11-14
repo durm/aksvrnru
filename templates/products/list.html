@@ -95,18 +95,12 @@
         req = {no_results_text: "Нет совпадений!"}
         $("select").chosen();
         $("#do_search_reset").click(function(){
-            $('select').val('').trigger('chosen:updated');
+            $("#search_form").find('select').val('Выбери производителя...').trigger('chosen:updated');
             $("#search_form").find(':input','#myform')
                 .removeAttr('checked')
                 .removeAttr('selected')
                 .not(':button, :submit, :reset, :hidden, :radio, :checkbox')
                 .val('');
-            /*
-            $('select').chosen('destroy');  
-
-            $('select').prop("selectedIndex", -1);   
-            $('select').chosen();
-            */
         });
     });
 </script>
