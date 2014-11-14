@@ -21,7 +21,6 @@ class Preview(Proto):
         upload_to=get_filename_model, 
         verbose_name=u"Файл",
         variations={
-            "large": (1024, 1024),
             "thumbnail": (128, 128),
             "medium": (512, 512),
         } 
