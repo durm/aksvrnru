@@ -93,7 +93,18 @@
 <script>
     $(document).ready(function(){
         req = {no_results_text: "Нет совпадений!"}
-        $("select").chosen()
+        $("select").chosen();
+        $("#do_search_reset").click(function(){
+            $(':input','#myform')
+                .removeAttr('checked')
+                .removeAttr('selected')
+                .not(':button, :submit, :reset, :hidden, :radio, :checkbox')
+                .val('');
+            $('select').chosen('destroy');  
+
+            $('select').prop("selectedIndex", -1);   
+            $('select').chosen();
+        });
     });
 </script>
 {% endblock %}
