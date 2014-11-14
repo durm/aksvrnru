@@ -6,6 +6,7 @@ from vendors.models import Vendor
 from previews.models import Preview
 from rubrics.models import Rubric
 from lxml import etree
+from aksvrnru.utils import *
 
 sale_rate = (
     (0, "0%"),
@@ -126,10 +127,19 @@ class Product(Proto) :
                 product.previews.clear()
                 for preview in previews :
                     product.previews.add(preview)
-                    print "-- add %s" % preview.name
+                    #print "-- add %s" % preview.name
                 #product.save()
-                print "%s) %s #%s" % (str(c), product.name, str(product.id))
+                #print "%s) %s #%s" % (str(c), product.name, str(product.id))
     
+    @staticmethod
+    def updateDescFromExternalLink():
+        for product in Product.objects.filter(desc=None).exclude(external_link=None):
+            desc = get_external_desc(product.external_link)
+            if desc is not None :
+                product.desc = desc
+                product.save()
+                print "done %s" % str(product.id)
+            
     def to_xml(self):
         pxml = etree.Element("product")
         pxml.set("id", str(self.id))

@@ -25,7 +25,7 @@ def get_external_desc(url):
         md = html_to_text(hd.decode("utf-8"))
         return md
     except:
-        return ""
+        return None
 
 def get_id():
     return str(uuid.uuid4())
