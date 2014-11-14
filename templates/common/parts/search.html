@@ -22,9 +22,20 @@
 <br/>
 {% if vendors %}
 <div class="form-group">
-    <select id="vendor" name="vendor" multiple="multiple" class="form-control" data-placeholder="Выбери производителя...">
+    <select id="search_vendor" name="vendor" multiple="multiple" class="form-control" data-placeholder="Выбери производителя...">
     {% for vendor in vendors %}
         <option value="{{ vendor.id }}" {% if vendor.id in qparams.vendor_filter %}selected="selected"{% endif %}>{{ vendor.name }}</option>
+    {% endfor %}
+    </select>
+</div>
+{% endif %}
+{% if rubrics %}
+<div class="form-group">
+    <select id="search_rubric" name="rubric" multiple="multiple" class="form-control" data-placeholder="Выбери рубрику...">
+    {% for rubric in rubrics %}
+        <option value="{{ rubric.id }}" {% if rubric.id in qparams.rubric_filter %}selected="selected"{% endif %}>
+            {{ rubric.name }}
+        </option>
     {% endfor %}
     </select>
 </div>
@@ -40,6 +51,7 @@ $(document).ready(function(){
             .removeAttr('selected')
             .not(':button, :submit, :reset, :hidden, :radio, :checkbox')
             .val('');
+        $("#search_vendor, #search_rubric").val('').trigger("chosen:updated");
     });
 });
 </script>
