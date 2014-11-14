@@ -4,3 +4,4 @@ mydatabase-journal
 *.DS_Store
 *migrations*
 media/*
+static/admin/*
