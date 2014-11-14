@@ -56,9 +56,9 @@ def listing(request):
     if price_to_filter :
         products = products.filter(retail_price__lt=price_to_filter)    
     if q_filter :
-        products = products.filter(Q(short_desc__contains=q_filter)|Q(name__contains=q_filter)|Q(desc__contains=q_filter)|Q(vendor__name__contains=q_filter))   
+        products = products.filter(Q(short_desc__icontains=q_filter)|Q(name__icontains=q_filter)|Q(desc__icontains=q_filter)|Q(vendor__name__icontains=q_filter))   
     if available_filter :
-        products = products.filter(available=available_filter)
+        products = products.filter(available_for_retail=available_filter)
     if vendor_filter :
         products = products.filter(vendor__in=vendor_filter)
     if rubric_filter :

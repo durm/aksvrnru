@@ -22,7 +22,7 @@
 <br/>
 {% if vendors %}
 <div class="form-group">
-    <select name="vendor" multiple="multiple" class="form-control">
+    <select id="vendor" name="vendor" multiple="multiple" class="form-control">
     {% for vendor in vendors %}
         <option value="{{ vendor.id }}" {% if vendor.id in qparams.vendor_filter %}selected="selected"{% endif %}>{{ vendor.name }}</option>
     {% endfor %}

@@ -89,14 +89,10 @@
 {% endblock %}
 
 {% block libs %}
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.1.0/chosen.jquery.min.js"></script>
 <script>
     $(document).ready(function(){
-        var max = -1;
-        $(".special_product").each(function() {
-            var h = $(this).height();
-            max = h > max ? h : max;
-        });
-        $(".special_product").height(max)
+        $("#vendor").chosen()
     });
 </script>
 {% endblock %}
