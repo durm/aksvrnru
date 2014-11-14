@@ -51,7 +51,7 @@ $(document).ready(function(){
             .removeAttr('selected')
             .not(':button, :submit, :reset, :hidden, :radio, :checkbox')
             .val('');
-        $("#search_vendor, #search_rubric").val('').trigger("chosen:updated");
+        $("#search_form select").val('').trigger("chosen:updated");
     });
 });
 </script>
