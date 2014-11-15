@@ -47,6 +47,10 @@ class Rubric(Proto):
     def get_published_children(self):
         return self.children().filter(is_published=True)
     
+    @staticmethod
+    def get_published_rubrics():
+        return Rubric.objects.filter(is_published=True)
+        
     """
     def get_products(self):
         return Product.objects.filter(rubrics__in=[self])

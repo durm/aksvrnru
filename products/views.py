@@ -31,6 +31,7 @@ def rubrics_hierarchy(request, choose=False, tpl='products/hierarchy.html', is_p
 def listing(request):
     
     vendors = Vendor.objects.all()
+    rubrics = Rubric.get_published_rubrics()
     
     q_filter = request.GET.get("q", "")
     price_from_filter = request.GET.get("price_from", "")
@@ -91,7 +92,7 @@ def listing(request):
     except EmptyPage:
         products = paginator.page(paginator.num_pages)
         
-    qparams = {'q_filter':q_filter, 'vendor_filter': map(id_to_int, vendor_filter), 'price_from_filter':price_from_filter, 'price_to_filter':price_to_filter, 'available_filter':available_filter}
+    qparams = {'q_filter':q_filter, 'vendor_filter': map(id_to_int, vendor_filter), 'rubric_filter': map(id_to_int, rubric_filter), 'price_from_filter':price_from_filter, 'price_to_filter':price_to_filter, 'available_filter':available_filter}
     
     qd = request.GET.copy()
     try:
@@ -111,7 +112,8 @@ def listing(request):
         "qparams":qparams, 
         "qparams_str":qd.urlencode(), 
         "product_count":products_count,
-        "vendors": vendors
+        "vendors": vendors,
+        "rubrics": rubrics
     }
     
     return render_to_response('products/list.html', req, get_context(request))

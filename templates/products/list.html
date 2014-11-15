@@ -55,7 +55,7 @@
                         <h4 class="media-heading">
                             <a href="{% url 'get_product' product.id %}">{{ product.vendor.name }} {{ product.name }}</a>
                         </h4>
-                        <p>{{ product.short_desc }}<p>
+                        {% if product.short_desc %}<p>{{ product.short_desc }}<p>{% endif %}
                         <div style="position:absolute; bottom: 10px;">
                             <a href="?vendor={{ product.vendor.id }}" style="color: #5cb85c; text-transform: lowercase;">{{ product.vendor.name }}</a>;&#160;
                             {% for r in product.rubrics.all %}
@@ -95,8 +95,8 @@
         req = {no_results_text: "Нет совпадений!"}
         $("select").chosen();
         $("#do_search_reset").click(function(){
-            $("#search_form").find('select').val('Выбери производителя...').trigger('chosen:updated');
-            $("#search_form").find(':input','#myform')
+            $("#search_form").find('select').val('').trigger('chosen:updated');
+            $("#search_form").find(':input')
                 .removeAttr('checked')
                 .removeAttr('selected')
                 .not(':button, :submit, :reset, :hidden, :radio, :checkbox')
