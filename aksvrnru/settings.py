@@ -65,8 +65,6 @@ DATABASES = {
     "default": default_engine,
 }
 
-THREADED = False
-
 LANGUAGE_CODE = "ru"
 
 TIME_ZONE = "Europe/Moscow"
@@ -85,6 +83,7 @@ STATICFILES_FINDERS = (
 )
 
 STATICFILES_DIRS = (
+os.path.join(BASE_DIR, "files"),
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

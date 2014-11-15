@@ -9,7 +9,6 @@ from django.contrib.auth import authenticate
 from aksvrnru.views import error, message
 from django.core.context_processors import csrf
 from django.core.urlresolvers import reverse
-from django.contrib.auth import authenticate, login
 import xlwt
 import StringIO, tempfile
 import uuid
@@ -27,6 +26,13 @@ def rubrics_hierarchy(request, choose=False, tpl='products/hierarchy.html', is_p
     else:
         return message(request, u"Нет активных рубрик!", u"")
 
+def proc_price_param(p):
+    try:
+        p = float(p.replace(",", "."))
+    except:
+        p = ""
+    return p
+
 # listing for products
 def listing(request):
     
@@ -34,17 +40,10 @@ def listing(request):
     rubrics = Rubric.get_published_rubrics()
     
     q_filter = request.GET.get("q", "")
-    price_from_filter = request.GET.get("price_from", "")
-    try:
-        price_from_filter = float(price_from_filter.replace(",", "."))
-    except:
-        price_from_filter = ""
-        
-    price_to_filter = request.GET.get("price_to", "")
-    try:
-        price_to_filter = float(price_to_filter.replace(",", "."))
-    except:
-        price_to_filter = ""
+    
+    price_from_filter = proc_price_param(request.GET.get("price_from", ""))
+    price_to_filter = proc_price_param(request.GET.get("price_to", ""))
+    
     available_filter = request.GET.get("a", "") == "1"
     
     vendor_filter = request.GET.getlist("vendor", None)
@@ -95,16 +94,13 @@ def listing(request):
     qparams = {'q_filter':q_filter, 'vendor_filter': map(id_to_int, vendor_filter), 'rubric_filter': map(id_to_int, rubric_filter), 'price_from_filter':price_from_filter, 'price_to_filter':price_to_filter, 'available_filter':available_filter}
     
     qd = request.GET.copy()
-    try:
+    
+    if "page" in qd :
         qd.pop('page')
-    except:
-        pass
-    
-    try:
+        
+    if "order_by" in qd :
         qd.pop('order_by')
-    except:
-        pass
-    
+        
     req = {
         "products": products, 
         "direction":direction, 
@@ -164,9 +160,6 @@ def construct_price(request):
     
     return render(build_price_xml(price, rubric_ids, parents))
     
-
 # get product url
 def get_product_url(product, domain):
     return xlwt.Formula(u'HYPERLINK("%s%s";"На сайте...")' % (domain, reverse('get_product', kwargs={'num':product.id})))
-
-
