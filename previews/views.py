@@ -2,6 +2,7 @@
 
 from django.shortcuts import render, render_to_response
 from previews.models import Preview
+from products.models import Product
 from aksvrnru.views import error
 from utils.views import get_context
 from aksvrnru.utils import *
@@ -25,9 +26,8 @@ def do_upload_zip(request):
                 destination.write(chunk)
 
         Preview.uploadFromZip(tmpname)
-
-        #threading.Thread(target=proc, args=(price))        
-
+        Product.linkToPreviews()
+        
         return message(request, u"В обработке!", u"Обработка zip ожидает своей очереди!")
     else:
         return error(request, u"Ошибка доступа", u"Только персонал может загрузить и распарсить zip!")

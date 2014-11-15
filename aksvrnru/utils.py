@@ -33,19 +33,13 @@ def get_id():
 def retrieve(url, fname):
     urllib.urlretrieve(url, fname)
 
-def get_thumbnail(ipath, size, output, output_format='PNG'):
-    image = Image.open(ipath)
-    if image.mode not in ("L", "RGB"):
-        image = image.convert("RGB")
-
-    image.thumbnail(size, Image.ANTIALIAS)
-    image.save(output, output_format)
-
-def add_watermark(orig, mark, dest):
+def add_watermark(orig, mark, dest=None):
     baseim = Image.open(orig)
     logoim = Image.open(mark)
-    baseim.paste(logoim, (baseim.size[0]-logoim.size[0], baseim.size[1]-logoim.size[1]), logoim)
-    baseim.save(dest,"PNG")
+    baseim.paste(logoim, (baseim.size[0]-logoim.size[0], baseim.size[1]-logoim.size[1]))
+    if dest is None :
+        dest = orig
+    baseim.convert("RGB").save(dest,"JPEG")
 
 def get_tempfile():
     return tempfile.mktemp()

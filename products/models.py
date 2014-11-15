@@ -127,10 +127,7 @@ class Product(Proto) :
                 product.previews.clear()
                 for preview in previews :
                     product.previews.add(preview)
-                    #print "-- add %s" % preview.name
-                #product.save()
-                #print "%s) %s #%s" % (str(c), product.name, str(product.id))
-    
+                    
     @staticmethod
     def updateDescFromExternalLink():
         for product in Product.objects.filter(desc=None).exclude(external_link=None):

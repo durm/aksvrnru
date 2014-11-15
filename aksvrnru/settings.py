@@ -59,7 +59,7 @@ DEBUG = aksconf.DEBUG
 default_engine = aksconf.default_engine
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-WATER_MARK = os.path.join(STATIC_ROOT, "watermark.png")
+WATERMARK = os.path.join(STATIC_ROOT, "aksvrn_logo_bottom.jpg")
 
 DATABASES = {
     "default": default_engine,

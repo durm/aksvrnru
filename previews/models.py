@@ -7,6 +7,8 @@ from aksvrnru.utils import *
 from django.core.files.base import ContentFile
 import zipfile
 import traceback
+from django.db.models.signals import post_save
+from aksvrnru import settings
 
 def get_filename():
     path = get_id()
@@ -62,3 +64,9 @@ class Preview(Proto):
     
     class Meta :
         verbose_name = u"Превью"
+        
+def add_watermark_to_preview(sender, instance, **kwargs):
+     add_watermark(instance.image.medium.path, settings.WATERMARK)
+     
+# register the signal
+post_save.connect(add_watermark_to_preview, sender=Preview)
