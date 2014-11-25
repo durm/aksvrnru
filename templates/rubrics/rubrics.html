@@ -40,7 +40,7 @@
                     <div class="col-md-2">
                         <a href="?rubric={{ rubric.id }}" title="{{rubric.name}}" class="folder">
                         <img src="{% static 'folder.png' %}" style="display: block;"/>
-                        <span>{% if rubric.name|length > 23 %}{{rubric.name|slice:":20"}}...{% else %}{{rubric.name}}{% endif %}</span>
+                        <span>{% if rubric.name|length > 15 %}{{rubric.name|slice:":12"}}...{% else %}{{rubric.name}}{% endif %}</span>
                         </a>
                     </div>
                 {% endfor %}
