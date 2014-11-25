@@ -33,12 +33,12 @@
                 {% endif %}
                 {% if rubrics %}
                 <h2>Рубрики</h2>
-                <div class="row show-grid">
+                <div class="row">
                     {% for rubric in rubrics %}
-                        <div class="col-md-1">
+                        <div class="col-md-3">
                             <a href="?rubric={{ rubric.id }}" title="{{rubric.name}}">
-                            <img src="/media/folder.png" style="display: block;"/>
-                            <h4>{{rubric.name|slice:":20"}}</h4>
+                            <img src="{% static 'folder.png' %}" style="display: block;"/>
+                            <span>{% if rubric.name|length > 20 %}{{rubric.name|slice:":20"}}{% else %}{{rubric.name}}{% endif %}</span>
                             </a>
                         </div>
                     {% endfor %}
