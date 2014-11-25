@@ -69,4 +69,4 @@ def add_watermark_to_preview(sender, instance, **kwargs):
      add_watermark(instance.image.medium.path, settings.WATERMARK)
      
 # register the signal
-post_save.connect(add_watermark_to_preview, sender=Preview)
+# post_save.connect(add_watermark_to_preview, sender=Preview)
