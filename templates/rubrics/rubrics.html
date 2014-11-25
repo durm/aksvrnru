@@ -21,7 +21,7 @@
             <ol class="breadcrumb">
                 <li><a href=".">Рубрикатор</a></li>
                 {% if main %}
-                    {% for step in main.rubricator_path %}
+                    {% for step in rubricator_path %}
                         <li {% if step.id == main.id %}class="active"{% endif %}>
                             {% if step.id == main.id %}
                                 {{step.name}}
@@ -30,6 +30,19 @@
                             {% endif %}
                         </li>
                     {% endfor %}
+                {% endif %}
+                {% if rubrics %}
+                <h2>Рубрики</h2>
+                <div class="row show-grid">
+                    {% for rubric in rubrics %}
+                        <div class="col-md-1">
+                            <a href="?rubric={{ rubric.id }}" title="{{rubric.name}}">
+                            <img src="/media/folder.png" style="display: block;"/>
+                            <h4>{{rubric.name|slice:":20"}}</h4>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
                 {% endif %}
             </ol>
         </div>
