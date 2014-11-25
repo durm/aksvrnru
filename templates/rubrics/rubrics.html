@@ -36,7 +36,9 @@
             {% if rubrics %}
             <h2>Рубрики</h2>
             <div class="row">
+                {% if main %}
                 {% set rubrics=main.get_published_children %}
+                {% endif %}
                 {% for rubric in rubrics %}
                     <div class="col-md-3">
                         <a href="?rubric={{ rubric.id }}" title="{{rubric.name}}" class="folder">
