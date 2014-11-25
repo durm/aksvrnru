@@ -1,0 +1,46 @@
+{% extends "base/base.html" %}
+
+{% load markdown_deux_tags %}
+{% load staticfiles %}
+
+{% block title %}
+    {% if pages_settings %}
+        {{pages_settings.site_name}}
+    {% else %}
+        Aksvrn
+    {% endif %} | Рубрикатор
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-12 col-sm-3">
+            {% include "rubrics/rubricator_list.html" %}
+        </div>
+        <div class="col-xs-12 col-sm-9">
+            <ol class="breadcrumb">
+                <li><a href=".">Рубрикатор</a></li>
+                {% if main %}
+                    {% for step in main.rubricator_path %}
+                        <li {% if step.id == main.id %}class="active"{% endif %}>
+                            {% if step.id == main.id %}
+                                {{step.name}}
+                            {% else %}
+                                <a href="?rubric={{step.id}}" >{{step.name}}</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block libs %}
+
+{% endblock %}
+
+{% block head %}
+{% endblock %}
+

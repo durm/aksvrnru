@@ -33,7 +33,6 @@ def proc_price_param(p):
         p = ""
     return p
 
-# listing for products
 def listing(request):
     
     vendors = Vendor.objects.all()
@@ -132,7 +131,7 @@ def get_product(request, num):
         
         return render_product(request, product)
     except Product.DoesNotExist :
-        return page_doesnot_exist(request, num)
+        return error(request, u"Нет продукта с таким идентификатором!", u"")
 
 # product renderer
 def render_product(request, product):

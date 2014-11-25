@@ -50,6 +50,15 @@ class Rubric(Proto):
     @staticmethod
     def get_published_rubrics():
         return Rubric.objects.filter(is_published=True)
+    
+    def rubricator_path(self):
+        def add_to_path(rubric, path):
+            if rubric is None : return path
+            return add_to_path(rubric.parent, path + [rubric])
+        rev_path = add_to_path(self.parent, [self])
+        rev_path.reverse()
+        return rev_path
+        
         
     """
     def get_products(self):

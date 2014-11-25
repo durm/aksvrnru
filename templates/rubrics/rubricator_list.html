@@ -1,0 +1,12 @@
+<ul>
+{% for rubric in rubrics %}
+    <li>
+        <a href="?rubric={{rubric.id}}" {% if main.id == rubric.id %}style="color: #5cb85c;"{% endif %}>{{rubric.name}}</a>
+        {% if rubric.id in parents_id %}
+            {% with rubrics=rubric.get_published_children parents_id=parents_id %}
+                {% include "rubrics/rubricator_list.html" %}
+            {% endwith %}
+        {% endif %}
+    </li>
+{% endfor %}
+</ul>
