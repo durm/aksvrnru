@@ -36,9 +36,9 @@
                 <div class="row">
                     {% for rubric in rubrics %}
                         <div class="col-md-3">
-                            <a href="?rubric={{ rubric.id }}" title="{{rubric.name}}">
+                            <a href="?rubric={{ rubric.id }}" title="{{rubric.name}}" class="folder">
                             <img src="{% static 'folder.png' %}" style="display: block;"/>
-                            <span>{% if rubric.name|length > 20 %}{{rubric.name|slice:":20"}}{% else %}{{rubric.name}}{% endif %}</span>
+                            <span>{% if rubric.name|length > 23 %}{{rubric.name|slice:":20"}}...{% else %}{{rubric.name}}{% endif %}</span>
                             </a>
                         </div>
                     {% endfor %}
@@ -55,5 +55,13 @@
 {% endblock %}
 
 {% block head %}
+<style>
+.folder {
+text-align: center;
+}
+.folder:hover {
+border: #ececec dotted 1px;
+}
+</style>
 {% endblock %}
 
