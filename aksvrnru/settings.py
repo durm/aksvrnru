@@ -89,6 +89,7 @@ os.path.join(BASE_DIR, "files"),
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.csrf",
+    'django.core.context_processors.request',
 )
 
 EMAIL_HOST = "smtp.yandex.ru"
