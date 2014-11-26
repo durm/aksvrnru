@@ -53,7 +53,9 @@
                                             {% endif %}
                                         </a>
                                     </h4>
-                                    <p style="color: #636363;">Количество {{rubric|products_count}}</p>
+                                    {% if rubric.desc %}
+                                    <p style="color: #636363;">{{rubric.desc}}</p>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
