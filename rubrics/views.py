@@ -31,8 +31,6 @@ def rubricator(request):
         all_children = rubric.get_all_published_children()
         products = products.filter(Q(rubrics__in=all_children)|Q(rubrics__in=[rubric]))
         rubrics_view = all_children
-        Product.get_product_count = types.MethodType(lambda self : "xx",Product)
-        #len(Products.objects.filter(Q(rubrics_all=self.get_all_published_children())|Q(rubrics__in=[self])))
     products = products.order_by("?")[:21]
     
     return render_to_response("rubrics/rubrics.html", {'main': rubric, 'products':products, 'rubrics_view':rubrics_view, 'rubrics':rubrics, 'parents_id':parents_id, 'rubricator_path':rubricator_path}, get_context(request))
