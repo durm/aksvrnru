@@ -12,5 +12,5 @@ def query_transform(context, **kwargs):
     request = context['request']
     updated = request.GET.copy()
     updated.update(kwargs)
-    return updated.urlencode
+    return updated.urlencode()
     
