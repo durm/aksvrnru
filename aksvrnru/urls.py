@@ -9,7 +9,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     
-    url(r'^$', 'pages.views.home', name='home'),
+    url(r'^$', 'rubrics.views.rubricator', name='rubricator'),
     url(r'^products/', include('products.urls')),
     url(r'^pages/', include('pages.urls')),
     url(r'^userprofiles/', include('userprofiles.urls')),
