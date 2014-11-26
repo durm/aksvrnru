@@ -3,6 +3,7 @@
 from django import template
 from rubrics.models import Rubric
 from products.models import Product
+from django.db.models import Q
 
 register = template.Library()
 
