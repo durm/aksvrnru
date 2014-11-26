@@ -46,5 +46,7 @@ def rubricator(request):
                 products = paginator.page(1)
             except EmptyPage:
                 products = paginator.page(paginator.num_pages)
+    else:
+        products = products.order_by("?")[:21]
     
     return render_to_response("rubrics/rubrics.html", {'main': rubric, 'products':products, 'products_count':products_count, 'rubrics_view':rubrics_view, 'rubrics':rubrics, 'parents_id':parents_id, 'rubricator_path':rubricator_path}, get_context(request))
