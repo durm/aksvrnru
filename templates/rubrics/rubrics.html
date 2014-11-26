@@ -96,7 +96,8 @@
                         </div>
                     {% endfor %}
                     
-                    {% if products.has_previous or products.has_next %}
+                </div>
+                {% if products.has_previous or products.has_next %}
                     <ul class="pager">
                         {% if products.has_previous %}
                             <li class="pull-left"><a href="?{% query_transform page=products.previous_page_number %}">Предыдущие</a></li>
@@ -107,7 +108,6 @@
                         {% endif %}
                     </ul>
                     {% endif %}
-                </div>
             </div>
             {% endif %}
         </div>
