@@ -12,4 +12,10 @@ def get_products_count(rubric):
     products = Product.get_published_products().filter(Q(rubrics__in=all_children)|Q(rubrics__in=[rubric]))
     return len(products)
     
+@register.simple_tag
+def query_transform(request, **kwargs):
+    updated = request.GET.copy()
+    updated.update(kwargs)
+    return updated.urlencode
+    
 register.filter('products_count', get_products_count)
