@@ -32,7 +32,6 @@
                         </li>
                     {% endfor %}
                 {% endif %}
-                
             </ol>
             {% if rubrics_view %}
             <h2>Рубрики</h2>
@@ -63,7 +62,11 @@
             </div>
             {% endif %}
             {% if products %}
-            <h2>Продукты</h2>
+            {% if rubrics_view %}
+                <h2>Продукты из подрубрик</h2>
+            {% else %}
+                <h2>Продукты</h2>
+            {% endif %}
             <div> 
                 <div class="row">
                     
@@ -90,6 +93,18 @@
                             </div>
                         </div>
                     {% endfor %}
+                    
+                    {% if products.has_previous or products.has_next %}
+                    <ul class="pager">
+                        {% if products.has_previous %}
+                            <li class="pull-left"><a href="?page={{ products.previous_page_number }}">Предыдущие</a></li>
+                        {% endif %}
+                        <li>Страница {{ products.number }} из {{ products.paginator.num_pages }}</li>
+                        {% if products.has_next %}
+                            <li class="pull-right"><a href="?page={{ products.next_page_number }}">Cледующие</a></li>
+                        {% endif %}
+                    </ul>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}
