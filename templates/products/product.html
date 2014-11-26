@@ -11,7 +11,7 @@
 <div class="container">
 
     <ol class="breadcrumb">
-        <li><a href="{% url 'rubricator' %}">Рубрикатор</a></li>
+        <li><a href="{% url 'rubricator' %}">Каталог</a></li>
         {% if product.rubrics.all.0 %}
             {% for step in product.rubrics.all.0.rubricator_path %}
                 <li>
