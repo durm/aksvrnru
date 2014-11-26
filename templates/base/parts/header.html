@@ -17,6 +17,12 @@
         </div>
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
+                <li>
+                    <a href="{% url 'listing' %}">Поиск</a>
+                </li>
+                <li>
+                    <a href="{% url 'rubricator' %}">Каталог</a>
+                </li>
                 {% for tp in pages_settings.top_menu.all %}
                     <li>
                         <a href="{% url 'get_page' tp.id %}">{{tp.title}}</a>
