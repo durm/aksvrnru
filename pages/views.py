@@ -8,7 +8,6 @@ from utils.views import get_context
 from django.core.urlresolvers import reverse
 
 def home(request):
-    return reverse('rubricator')
     special_price_products = None #Product.subset_of_special_price()
 
     req = {
