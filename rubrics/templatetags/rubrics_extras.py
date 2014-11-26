@@ -11,6 +11,8 @@ register = template.Library()
 def query_transform(context, **kwargs):
     request = context['request']
     updated = request.GET.copy()
+    if "page" in updated :
+        qd.pop('page')
     updated.update(kwargs)
     return updated.urlencode()
     
