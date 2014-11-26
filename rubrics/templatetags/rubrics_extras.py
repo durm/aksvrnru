@@ -13,4 +13,3 @@ def query_transform(request, **kwargs):
     updated.update(kwargs)
     return updated.urlencode
     
-register.filter('products_count', get_products_count)
