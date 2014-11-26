@@ -33,7 +33,7 @@ def rubricator(request):
         all_children = rubric.get_all_published_children()
         products = products.filter(Q(rubrics__in=all_children)|Q(rubrics__in=[rubric]))
         rubrics_view = all_children
-        if len(rubric_view) :
+        if len(rubrics_view) :
             products = products.order_by("?")[:21]
         else:
             products_count = products.count()
