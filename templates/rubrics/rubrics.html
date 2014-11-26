@@ -99,9 +99,9 @@
                 </div>
                 {% if products.has_previous or products.has_next %}
                     <ul class="pager">
-                        <li class="pull-left {% if not products.has_previous %}disabled{% endif %}"><a href="?{% query_transform page=products.previous_page_number %}">Предыдущие</a></li>
+                        <li class="pull-left {% if not products.has_previous %}disabled{% endif %}"><a href="?{% if not products.has_previous %}{% query_transform page=products.previous_page_number %}{% endif %}">Предыдущие</a></li>
                         <li>Страница {{ products.number }} из {{ products.paginator.num_pages }}</li>
-                        <li class="pull-right {% if not products.has_next %}disabled{% endif %}"><a href="?{% query_transform page=products.next_page_number %}">Cледующие</a></li>
+                        <li class="pull-right {% if not products.has_next %}disabled{% endif %}"><a href="?{% if not products.has_next %}{% query_transform page=products.next_page_number %}{% endif %}">Cледующие</a></li>
                     </ul>
                 {% endif %}
             </div>
