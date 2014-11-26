@@ -112,12 +112,16 @@ class Product(Proto) :
     )
 
     @staticmethod
+    def get_published_products():
+        return Product.objects.filter(is_published=True)
+
+    @staticmethod
     def subset_by_rubrics(r, c = 6):
-        return Product.objects.filter(is_published=True, rubrics__in=r.all()).order_by("?")[:c]
+        return Product.get_published_products().filter(rubrics__in=r.all()).order_by("?")[:c]
     
     @staticmethod
     def subset_of_special_price(c = 6):
-        return Product.objects.filter(is_published=True, is_special_price=True).order_by("?")[:c]
+        return Product.get_published_products().filter(is_special_price=True).order_by("?")[:c]
     
     @staticmethod
     def linkToPreviews():
@@ -142,6 +146,21 @@ class Product(Proto) :
         pxml.set("id", str(self.id))
         pxml.set("name", self.name)
         return pxml
+    
+    def get_preview(self):
+        try:
+            return self.previews.all()[0]
+        except:
+            return None
+            
+    def get_full_name(self):
+        return " ".join([self.vendor.name, self.name])
+        
+    def get_full_desc(self):
+        parts = [self.vendor.name, self.name]
+        if self.short_desc :
+            parts += [self.short_desc]
+        return " | ".join(parts)
     
     class Meta :
         verbose_name = u"Продукт"

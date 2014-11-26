@@ -2,6 +2,7 @@
 
 {% load markdown_deux_tags %}
 {% load staticfiles %}
+{% load rubrics_extras %}
 
 {% block title %}
     {% if pages_settings %}
@@ -33,17 +34,63 @@
                 {% endif %}
                 
             </ol>
-            {% if rubrics %}
+            {% if rubrics_view %}
             <h2>Рубрики</h2>
-            <div class="row">
-                {% for rubric in rubrics_view %}
-                    <div class="col-md-2">
-                        <a href="?rubric={{ rubric.id }}" title="{{rubric.name}}" class="folder">
-                        <img src="{% static 'folder.png' %}" style="display: block;"/>
-                        <span>{% if rubric.name|length > 15 %}{{rubric.name|slice:":12"}}...{% else %}{{rubric.name}}{% endif %}</span>
-                        </a>
-                    </div>
-                {% endfor %}
+            <div> 
+                <div class="row">
+                    {% for rubric in rubrics_view %}
+                        <div class="col-md-4">
+                            <div class="media" style="min-height: 100px;">
+                                <a class="media-left pull-left" href="?rubric={{rubric.id}}">
+                                    <img src="{% static 'folder.png' %}" alt="{{rubric.name}}"/>
+                                </a>
+                                <div class="media-body" style="margin-top: 3px;">
+                                    <h4 class="media-heading">
+                                        <a href="?rubric={{rubric.id}}">
+                                            {% if rubric.name|length > 23 %}
+                                                {{rubric.name|slice:":20"}}...
+                                            {% else %}
+                                                {{rubric.name}}
+                                            {% endif %}
+                                        </a>
+                                    </h4>
+                                    <p style="color: #636363;">Количество {{rubric.get_product_count}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% if products %}
+            <h2>Продукты</h2>
+            <div> 
+                <div class="row">
+                    
+                    {% for product in products %}
+                        <div class="col-md-4">
+                            <div class="media" title="{{product.get_full_desc}}" style="min-height: 100px;">
+                                <a class="media-left pull-left" href="{% url 'get_product' product.id %}">
+                                    <img src="{% if product.previews.all.0 %}{{product.previews.all.0.image.thumbnail.url}}{% else %}{% static 'no-photo.png' %}{% endif %}" alt="{{product.name}}" style="max-width: 64px; max-height: 64px;"/>
+                                </a>
+                                <div class="media-body" style="margin-top: 5px;">
+                                    <h4 class="media-heading">
+                                        <a href="{% url 'get_product' product.id %}">
+                                        {% if product.get_full_name|length > 18 %}
+                                            {{product.get_full_name|slice:":15"}}...
+                                        {% else %}
+                                            {{product.get_full_name}}
+                                        {% endif %}
+                                        </a>
+                                    </h4>
+                                    <p style="color: #636363;">
+                                    {{product.retail_price}}р.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
             {% endif %}
         </div>
@@ -56,5 +103,10 @@
 {% endblock %}
 
 {% block head %}
+<style>
+a.folder {
+margin: 10px;
+}
+</style>
 {% endblock %}
 

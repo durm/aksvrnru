@@ -50,6 +50,15 @@ class Rubric(Proto):
     @staticmethod
     def get_published_rubrics():
         return Rubric.objects.filter(is_published=True)
+        
+    def get_all_published_children(self):
+        def iter_func(rubric, l):
+            for c in rubric.get_published_children() :
+                print c
+                l += [c]
+                l = iter_func(c, l)
+            return l
+        return iter_func(self, [])    
     
     def rubricator_path(self):
         def add_to_path(rubric, path):
@@ -58,16 +67,7 @@ class Rubric(Proto):
         rev_path = add_to_path(self.parent, [self])
         rev_path.reverse()
         return rev_path
-        
-        
-    """
-    def get_products(self):
-        return Product.objects.filter(rubrics__in=[self])
 
-    def get_published_products(self):
-        return self.get_products().filter(is_published=True)
-    """
-    
     def to_xml(self):
         """<rubric name="%s" colour_index="%s" hashsum="%s">"""
         rxml = etree.Element("rubric")
@@ -78,5 +78,5 @@ class Rubric(Proto):
 
     class Meta :
         verbose_name = u"Рубрика"
-
-
+    
+    
