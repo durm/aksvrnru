@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from utils.models import Proto
 from lxml import etree
+from stdimage.models import StdImageField
 
 class Rubric(Proto):
 
@@ -38,11 +39,15 @@ class Rubric(Proto):
         verbose_name=u"Не обновлять из прайса"
     )
     
-    image = models.ImageField(
-        upload_to=u"rubrics", 
+    image = StdImageField(
+        upload_to="rubrics", 
         verbose_name=u"Картинка",
-        null=True, 
-        blank=True
+        null=True,
+        blank=True,
+        variations={
+            "thumbnail": (128, 128),
+            "medium": (512, 512),
+        } 
     )
 
     def has_children(self):
