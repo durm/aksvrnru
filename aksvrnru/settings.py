@@ -30,6 +30,7 @@ INSTALLED_APPS = (
     "utils",
     "pricelog",
     "stdimage",
+    "south",
 )
 
 MIDDLEWARE_CLASSES = (
