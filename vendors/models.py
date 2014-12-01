@@ -6,5 +6,12 @@ from utils.models import Proto
 
 class Vendor(Proto):
     
+    image = models.ImageField(
+        upload_to=u"rubrics", 
+        verbose_name=u"vendors",
+        null=True, 
+        blank=True
+    )
+    
     class Meta :
         verbose_name = u"Производитель"

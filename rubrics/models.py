@@ -37,6 +37,13 @@ class Rubric(Proto):
         default=False, 
         verbose_name=u"Не обновлять из прайса"
     )
+    
+    image = models.ImageField(
+        upload_to=u"rubrics", 
+        verbose_name=u"Картинка",
+        null=True, 
+        blank=True
+    )
 
     def has_children(self):
         return len(Rubric.objects.filter(parent=self)[:1]) == 1 #lazy
