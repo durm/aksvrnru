@@ -47,7 +47,7 @@ class Rubric(Proto):
         variations={
             "thumbnail": (128, 128),
             "medium": (512, 512),
-        } 
+        },
     )
 
     def has_children(self):
