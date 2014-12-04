@@ -99,8 +99,8 @@ EMAIL_PORT = 25
 EMAIL_USE_TLS = True
 
 #NOTES_EMAIL = "aksesavto@yandex.ru"
-NOTES_EMAIL_FROM = "durm.icecoffee@gmail.com"
-NOTES_EMAIL_TO = "durm.icecoffee@gmail.com"
+NOTES_EMAIL_FROM = "aksesavto@yandex.ru"
+NOTES_EMAIL_TO = "aksesavto@yandex.ru"
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  "templates"),
