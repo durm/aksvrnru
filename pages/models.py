@@ -65,7 +65,7 @@ class PagesSettings(AbstractSettings):
         null=True, 
         blank=True, 
         verbose_name=u"Верхнее меню", 
-        related_name="+tm"
+        related_name="tm"
     )
     
     bottom_menu = models.ManyToManyField(
@@ -73,7 +73,7 @@ class PagesSettings(AbstractSettings):
         null=True, 
         blank=True, 
         verbose_name=u"Нижнее меню", 
-        related_name="+bm"
+        related_name="bm"
     )
     
     jumbotron_h = models.CharField(

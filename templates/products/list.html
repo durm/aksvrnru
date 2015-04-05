@@ -73,7 +73,7 @@
                     {% endif %}
                     <li>Страница {{ products.number }} из {{ products.paginator.num_pages }}</li>
                     {% if products.has_next %}
-                        <li class="pull-right"><a href="?page={{ products.next_page_number }}{% if order_by %}&order_by={{order_by}}{% if direction == '-' %}&direction=-{% endif %}{% endif %}&{{qparams_str}}">next</a></li>
+                        <li class="pull-right"><a href="?page={{ products.next_page_number }}{% if order_by %}&order_by={{order_by}}{% if direction == '-' %}&direction=-{% endif %}{% endif %}&{{qparams_str}}">Следующие</a></li>
                     {% endif %}
                 </ul>
                 {% endif %}

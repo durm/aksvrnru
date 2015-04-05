@@ -54,7 +54,7 @@ else:
     
 import aksconf
 
-MEDIA_ROOT = aksconf.MEDIA_ROOT
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 DEBUG = aksconf.DEBUG
 default_engine = aksconf.default_engine
 

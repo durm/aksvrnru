@@ -18,6 +18,7 @@ from aksvrnru import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from lxml import etree
+from pricelog.xlstools.xmltoxls import xml_to_xls
 
 def rubrics_hierarchy(request, choose=False, tpl='products/hierarchy.html', is_published=True):
     rubrics = Rubric.objects.filter(parent__isnull=True, is_published=True)
@@ -154,7 +155,7 @@ def build_price_xml(xml, rubric_ids, rubrics):
     for rubric in rubrics :
         rxml = rubric.to_xml()
         build_price_xml(rxml, rubric_ids, rubric.get_published_children().filter(id__in=rubric_ids))
-        for product in Product.objects.filter(parent__in=[rubric], is_published=True) :
+        for product in Product.objects.filter(rubrics__in=[rubric], is_published=True) :
             rxml.append(product.to_xml())
         xml.append(rxml)
 
@@ -164,7 +165,17 @@ def construct_price(request):
     price = etree.Element("price")
     parents = Rubric.objects.filter(id__in=rubric_ids, parent=None)
     
-    return render(build_price_xml(price, rubric_ids, parents))
+    build_price_xml(price, rubric_ids, parents) 
+
+    myfile = StringIO.StringIO()
+
+    xls = xml_to_xls(price)
+    xls.save(myfile)
+    
+    response = HttpResponse(myfile.getvalue(), content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=myfile.xls'
+    response['Content-Length'] = myfile.tell()
+    return response
     
 # get product url
 def get_product_url(product, domain):
