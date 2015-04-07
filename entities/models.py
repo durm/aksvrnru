@@ -47,7 +47,7 @@ class Entity(Proto):
             for e in zf.namelist() :
                 if is_entity(e) :
                     c += 1
-                    print "%s) " % str(c),
+                    print ("%s) " % str(c))
                     store(zf, e)
 
     class Meta :

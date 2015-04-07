@@ -8,20 +8,12 @@ from stdimage.models import StdImageField
 
 class Rubric(Proto):
 
-    hashsum = models.CharField(
-        max_length=50, 
+    path = models.TextField(
         null=True, 
         blank=True,
-        verbose_name=u"Хэш-сумма"
+        verbose_name=u"Путь в рубрикаторе"
     )
     
-    colour_index = models.CharField(
-        max_length=50, 
-        null=True, 
-        blank=True,
-        verbose_name=u"Код цвета"
-    )
-
     parent = models.ForeignKey(
         "self",
         null=True, 
@@ -66,7 +58,6 @@ class Rubric(Proto):
     def get_all_published_children(self):
         def iter_func(rubric, l):
             for c in rubric.get_published_children() :
-                print c
                 l += [c]
                 l = iter_func(c, l)
             return l
@@ -84,9 +75,15 @@ class Rubric(Proto):
         """<rubric name="%s" colour_index="%s" hashsum="%s">"""
         rxml = etree.Element("rubric")
         rxml.set("name", self.name)
-        rxml.set("colour_index", self.colour_index)
-        rxml.set("hashsum", self.hashsum)
         return rxml
+    
+    @staticmethod    
+    def create_from_xml(xml, parent=None):
+        if len(xml) :
+            for elem in xml :
+                rubric = Rubric.objects.create(name=elem.get("name"), path=elem.get("path"), parent=parent)
+                rubric.save()
+                Rubric.create_from_xml(elem, parent=rubric)    
 
     class Meta :
         verbose_name = u"Рубрика"

@@ -139,7 +139,7 @@ class Product(Proto) :
             if desc is not None :
                 product.desc = desc
                 product.save()
-                print "done %s" % str(product.id)
+                print ("done %s" % str(product.id))
             
     def to_xml(self):
         pxml = etree.Element("product")
