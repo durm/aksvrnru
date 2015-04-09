@@ -9,19 +9,23 @@ from django.db.models import Q
 import types
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from rubrics.taxparser import parse_txt_tax
+from django.template.context_processors import csrf
+from django.core.urlresolvers import reverse
 
 def get_parents_id(rubric, ids):
     if rubric is None : return ids
     return get_parents_id(rubric.parent, ids + [rubric.id])
     
 def create_rubricator_from_file(request):
-    return render_to_response("rubrics/create_rubricator_from_file.html")
+    c = {}
+    c.update(csrf(request))
+    return render_to_response("rubrics/create_rubricator_from_file.html", c)
 
 def do_create_rubricator_from_file(request):
     rubricator = request.FILES["rubricator"].readlines()
-    tax = parse_txt_tax(rubricator)
+    tax = parse_txt_tax(map(lambda x: x.decode("utf-8"),rubricator))
     Rubric.create_from_xml(tax)
-    return redirect("/rubricator/create/")
+    return redirect(reverse("create_rubricator_from_file"))
     
 def rubricator(request):
     rubric_id = request.GET.get("rubric", None)
