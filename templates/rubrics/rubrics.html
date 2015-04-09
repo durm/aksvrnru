@@ -17,6 +17,7 @@
     <div class="row row-offcanvas row-offcanvas-right">
         <div class="col-xs-12 col-sm-3">
             {% if rubrics %}
+                {{ rubrics|length }}
                 <h2>Тип товара</h2>
                 {% include "rubrics/rubricator_list.html" %}
             {% else %}
