@@ -52,7 +52,7 @@ def rubricator(request):
         else:
             products_count = products.count()
             paginator = Paginator(products, 21)
-            
+             
             page = request.GET.get('page')
             try:
                 products = paginator.page(page)
